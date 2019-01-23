@@ -1,0 +1,26 @@
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+  <script src="./utils.js"></script>
+</head>
+<body>
+  <h1>PyTorch Fast Neural Style in ONNX.js</h1>
+  <div><input type="button" value="Run" onclick="runExample()"/></div>
+  
+  <p>
+    128x128 image:<br/>
+  <canvas id="canvas_128_src" height="128" width="128"></canvas>
+  <img src="images/candy.jpg" height="128" />
+  <canvas id="canvas_128_dst" height="128" width="128"></canvas>
+  <div id="predictions_128"></div>
+  </p>
+  <p>
+    256x256 image:<br/>
+  <canvas id="canvas_256_src" height="256" width="256"></canvas>
+  <img src="images/candy.jpg" height="256" />
+  <canvas id="canvas_256_dst" height="256" width="256"></canvas>
+  <div id="predictions_256"></div>
+  </p>
+
+</body>
+</html>
