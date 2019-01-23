@@ -33,12 +33,14 @@ These steps may seem easy, but not.  The following were the major obstacles enco
 
 This repository shows running the ONNX.js inference.
 
-## Install node.js
-Windows:
+## Run inference locally with `node.js`
+ONNX.js can be served locally by `node.js` via `npm`.
+
+Windows `npm` installer:
 ```
 https://nodejs.org/en/#download
 ```
-Ubuntu:
+Ubuntu `npm` installation:
 ```
 sudo apt install nodejs npm
 ```
