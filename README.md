@@ -1,18 +1,16 @@
 ## Run [PyTorch fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style) in web browsers using [ONNX.js](https://github.com/Microsoft/onnxjs)
 
-This repository is to give anyone who is interested to run PyTorch's fast-neural-style example in web browsers.  The _performance is by no means optimal_ due to many workarounds for issues and limitations during the conversion process and different operator/layer support level between PyTorch and ONNX.js.  But it serves the purpose to understand what it takes to go through the entire process.
+This repository is for anyone interested to run [PyTorch fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style) example in web browsers.  The _performance is by no means optimal_ due to many workarounds for issues and limitations during the conversion process and different operator/layer support level between PyTorch and ONNX.js.  But it serves the purpose to understand what it takes to go through the entire process.
 
-It an example for practicing and learning what it takes to make the PyTorch generated models portable to other deep learning frameworks, such as [ONNX.js](https://github.com/Microsoft/onnxjs).
+It is an example for practicing and learning what it takes to make the PyTorch generated models portable to other deep learning frameworks. [ONNX.js](https://github.com/Microsoft/onnxjs) is set as the target deep learning framework as it's very new, hance still primitive.
 
 This project is based on the following open source projects:
-- [PyTorch v1.0.0 - fast-neural-style example](https://github.com/pytorch/examples/tree/master/fast_neural_style) - ONNX model files.
-- [ONNX.js v0.1.2 - add example](https://github.com/Microsoft/onnxjs/tree/master/examples/browser/add).
+- [PyTorch v1.0.0 - fast-neural-style example](https://github.com/pytorch/examples/tree/master/fast_neural_style) for exporting ONNX model files (.onnx).
+- [ONNX.js v0.1.2 - add example](https://github.com/Microsoft/onnxjs/tree/master/examples/browser/add) for the javascript inference on the web.
 
-## Simple goal
+## Simple goal - Inference on the web
 The objective is simple: 
-<p align="center"><b>PyTorch models --> .onnx files --> ONNX.js to run inference.</b></p>
-
-It is frustrating for a deep learning beginner, like me, to go through various frameworks, model formats, model conversions, when developing and deploying a deep learning application.  Usually a deep learning framework comes with various examples.  Running such examples within the accompanied framework is usually ok.  Running examples in another framework, however, requires model conversion and the knowledge about the target framework.
+<p align="center"><b>PyTorch models --> .onnx files --> ONNX.js to run inference on the web.</b></p>
 
 There are many style transfer implementations.  PyTorch's fast-neural-style example is the most facinating one.  Partly due to the way it is implemented provides a much finer style-transfered images.  To run the inference in browser, the following 3 major steps are taken:
 
@@ -22,7 +20,7 @@ There are many style transfer implementations.  PyTorch's fast-neural-style exam
 
 Sounds straight forward!?  Read on...
 
-## Ugly honest (and ONNX) truth about the path to the web
+## Ugly honest/ONNX truth about the path to the web
 These steps may seem easy, but in practice it is way much more complicated.  
 
 The following were the major obstacles encountered during the process:
@@ -47,6 +45,8 @@ The following were the major obstacles encountered during the process:
    * If any op node depends on input/out tensor shape dynamically when doing inferencing, the result ONNX model graph can be absurdly huge (.onnx file at ~350MB) and highly complex (Composed of multiple `Reshape` and `Gather` ops).  Although still works, it is not practical to use such model files in web browsers.
 
 ## Tactical ways to workaround all roadblocks
+It is frustrating for a deep learning beginner, like me, to go through various frameworks, model formats, model conversions, when developing and deploying a deep learning application.  Usually a deep learning framework comes with various examples.  Running such examples within the accompanied framework is usually ok.  Running examples in another framework, however, requires model conversion and the knowledge about the target framework.
+
 One major goal is to minimize the changes in both PyTorch and ONNX.js
 
 ## Run inference locally with `node.js`
