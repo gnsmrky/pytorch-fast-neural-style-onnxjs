@@ -127,13 +127,9 @@ function tensorToContext (tensor, canvasId) {
 //     srcCanvasId - source canvas ID
 //     dstCanvasId - dest canvas ID
 //
-async function styleTransfer(onnxUrl, onnxOutputId, srcCanvasId, dstCanvasId) {
+async function styleTransfer(sess, onnxOutputId, srcCanvasId, dstCanvasId) {
 
   inputTensor = contextToTensor(srcCanvasId);
-
-  // create and run inference session
-  const sess = new onnx.InferenceSession();
-  await sess.loadModel(onnxUrl);
   
   // run inference
   const t0 = performance.now();
@@ -147,22 +143,38 @@ async function styleTransfer(onnxUrl, onnxOutputId, srcCanvasId, dstCanvasId) {
   return t1-t0;
 }
 
+var sess = null;
+
+var infer_128 = {
+  modelUrl: "./onnx_models/candy_128x128.onnx",
+  outputNodeName: "433",
+  canvas_src: canvas_128_src,
+  canvas_dst: canvas_128_dst,
+  output_html_id: "predictions_128"
+};
+
+var infer_256 ={
+  modelUrl: "./onnx_models/candy_256x256.onnx",
+  outputNodeName: "433",
+  canvas_src: canvas_256_src,
+  canvas_dst: canvas_256_dst,
+  output_html_id: "predictions_256"
+};
+
+var infer = infer_256;
 
 async function runExample() {
   setCanvasRGB(canvas_128_dst, 0xFF, 0, 0);
   setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
 
-  // load and run inference
-  const modelOuputId = "433";
+  // load model and create session
+  if (sess == null) {
+    sess = new onnx.InferenceSession();
+    await sess.loadModel(infer.modelUrl);
+  }
 
-  // 128x128
-  model128Url = "./onnx_models/candy_128x128.onnx";
-  inferTime_128 = await styleTransfer (model128Url, modelOuputId, canvas_128_src, canvas_128_dst);
-  predictions_128.innerHTML += "<p>inference time: " + inferTime_128 + "ms.</p>";
-
-  // 256x256
-  model256Url = "./onnx_models/candy_256x256.onnx";
-  inferTime_256 = await styleTransfer (model256Url, modelOuputId, canvas_256_src, canvas_256_dst);
-  predictions_256.innerHTML += "<p>inference time: " + inferTime_256 + "ms.</p>";
-  
+  // run inference
+  inferTime = await styleTransfer (sess, infer.outputNodeName, infer.canvas_src, infer.canvas_dst);
+  outputHtml = document.getElementById(infer.output_html_id);
+  outputHtml.innerHTML += "<p>inference time: " + inferTime + "ms.</p>"; 
 }
