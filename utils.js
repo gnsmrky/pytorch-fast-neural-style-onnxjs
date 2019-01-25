@@ -161,11 +161,11 @@ var infer_256 ={
   output_html_id: "predictions_256"
 };
 
-var infer = infer_256;
+var infer = infer_128;
 
 async function runExample() {
-  setCanvasRGB(canvas_128_dst, 0xFF, 0, 0);
-  setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
+  setCanvasRGB(infer.canvas_dst, 0xFF, 0, 0);
+  //setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
 
   // load model and create session
   if (sess == null) {
