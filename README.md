@@ -24,30 +24,41 @@ Sounds straight forward!?  Read on...
 These steps may seem easy, but in practice it is way much more complicated.  
 
 The following were the major obstacles encountered during the process:
-1. Operator/layer support levels are *very different*.
+1. **Operator/layer support levels are *very different*.**
    * PyTorch nn layers - [https://pytorch.org/docs/stable/nn.html](https://pytorch.org/docs/stable/nn.html)
    * PyTorch ONNX export operators - [https://pytorch.org/docs/stable/onnx.html#supported-operators](https://pytorch.org/docs/stable/onnx.html#supported-operators)
    * ONNX.js operators - [https://github.com/Microsoft/onnxjs/blob/master/docs/operators.md](https://github.com/Microsoft/onnxjs/blob/master/docs/operators.md)
    * PyTorch `nn.InstanceNorm2d()` is exported as ONNX `InstanceNormalization()`, but not supported by ONNX.js.
    * PyTorch `nn.functional.interpolate()` is exported as ONNX `Upsample()`, but not supported in ONNX.js.
-   * At time of writing (Jan, 2019), PyTorch ONNX export at opset version 9.  ONNX.js at ONNX opset version 7.
+   * At time of writing (Jan, 2019), PyTorch ONNX export at opset version 9 by default.  ONNX.js at ONNX opset version 7.
 
-2. Base tensor operations support levels are different.
+2. **Base tensor opset levels are different.**
    * PyTorch ONNX export only supports reduction operation, such as `mean()`,  along 1 axis.  i.e. `torch.mean(t, [2,3])` is not supported by PyTorch ONNX export.  (Although both PyTorch and ONNX.js supports multi-axis reduction ops.)
 
-3. ONNX.js has quite a few issues.
+3. **ONNX.js has quite a few issues.**
    * Same input values results in exception error.  ([ONNX.js issue #53](https://github.com/Microsoft/onnxjs/issues/53))
    * Some ops are *slow*, such as `Reshape()`, which is converted from PyTorch's `view()`.
    * `pow()` + `mean()` produces `NaN` values in javascript.
    * `pow()` op is *very* buggy.
 
-4. Dynamic tensor shapes exported by PyTorch ONNX is *very* large and hogs memory like hell.
+4. **Dynamic tensor shapes exported by PyTorch ONNX is *very* large and hogs memory like hell.**
    * If any op node depends on input/out tensor shape dynamically when doing inferencing, the result ONNX model graph can be absurdly huge (.onnx file at ~350MB) and highly complex (Composed of multiple `Reshape` and `Gather` ops).  Although still works, it is not practical to use such model files in web browsers.
 
 ## Tactical ways to workaround all roadblocks
 It is frustrating for a deep learning beginner, like me, to go through various frameworks, model formats, model conversions, when developing and deploying a deep learning application.  Usually a deep learning framework comes with various examples.  Running such examples within the accompanied framework is usually ok.  Running examples in another framework, however, requires model conversion and the knowledge about the target framework.
 
-One major goal is to minimize the changes in both PyTorch and ONNX.js
+One major goal is to minimize the changes in both PyTorch and ONNX.js as both frameworks are being updated frequently.  This is true particularly for ONNX.js as it is still in heavy development cycles.  
+
+Thus, the following technicques were used:
+1. The only change for PyTorch is to change the default export opset level from 9 to 7.
+2. No change to ONNX.js.
+3. Break down the un-supported `InstanceNorm` and `Upsample` ops to basic ops.
+   * Rewrite using the basic ops and make sure the ops run correctly in ONNX.js.
+   * Optimize the re-written ops so the performance is optimal in ONNX.js.  (Involves repeative tries with different basic ops and benchmark in ONNX.js.)
+4. Make sure the pre-trained PyTorch weights and models (.pth and .model files) can still be used.
+   * _So no re-training is needed._
+
+For details, please see [gnsmrky's PyTorch fast-neural-style for ONNX.js repo](www.github.com)
 
 ## Run inference locally with `node.js`
 ONNX.js can be served locally by `node.js` via `npm`.
