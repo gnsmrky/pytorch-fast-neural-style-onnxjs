@@ -163,7 +163,13 @@ var infer_256 ={
 
 var infer = infer_128;
 
+var counter = 0;
 async function runExample() {
+  counter =0;
+  runInference();
+}
+
+async function runInference(){
   setCanvasRGB(infer.canvas_dst, 0xFF, 0, 0);
   //setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
 
@@ -177,4 +183,8 @@ async function runExample() {
   inferTime = await styleTransfer (sess, infer.outputNodeName, infer.canvas_src, infer.canvas_dst);
   outputHtml = document.getElementById(infer.output_html_id);
   outputHtml.innerHTML += "<p>inference time: " + inferTime + "ms.</p>"; 
+
+  if (counter++ != 10){
+    setTimeout(()=>{runInference();},1000)
+  }
 }
