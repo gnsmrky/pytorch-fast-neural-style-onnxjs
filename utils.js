@@ -1,5 +1,68 @@
 
 
+const srcImageBaseUrl  = "./images/amber_###x###.jpg";
+const onnxModelBaseUrl = "./onnx_models/candy_###x###.onnx";
+const onnxOutputNodeName = "433";
+
+const srcCanvasId = "canvas_src";
+const dstCanvasId = "canvas_dst";
+
+const totalRunCount = 10;
+const inferTimeOut  = 5000; // in ms
+
+// html utilities
+function onSizeSelectChange() {
+  var sizeStr = document.getElementById("img_size").value;
+  
+  generateInferStyleHTML(sizeStr);
+}
+
+function generateInferStyleHTML(sizeStr) {
+  // generate HTML
+  var html = "";
+
+  html += "<canvas id='" + srcCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
+  html += "<img src='images/candy.jpg' height=" + sizeStr + " />";
+  html += "<canvas id='" + dstCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
+
+  inferStyle.innerHTML = html;
+
+  // load source image
+  imgUrl = srcImageBaseUrl.replace(/###/g,sizeStr);
+
+  loadImage (imgUrl, srcCanvasId);
+
+  // fill dest canvas to green
+  setCanvasRGB (dstCanvasId, 0x00, 0xFF, 0x00);
+}
+
+window.onload = function() {
+  var sizeStr = document.getElementById("img_size").value;
+  
+  generateInferStyleHTML(sizeStr);
+}
+
+//
+// loadImage()
+//     imageUrl - URL for image to load
+//     canvasId - target canvas ID
+//     completeProc - callback when complete
+//
+function loadImage (imageUrl, canvasId, completeProc=null) {
+  var img = new Image();
+  img.src = imageUrl
+  img.onload=function() {
+    var ctx = document.getElementById(canvasId).getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    if (completeProc != null) {
+      completeProc();
+    }
+  }
+}
+
+
+// canvas utilities
 function setCanvasRGB(canvasId, r, g, b, a=0xFF){
   var ctx = document.getElementById(canvasId).getContext("2d");
   var h = ctx.canvas.height;
@@ -22,39 +85,7 @@ function setCanvasRGB(canvasId, r, g, b, a=0xFF){
 
 }
 
-var imgUrl_128 = "./images/amber_128x128.jpg";
-var canvas_128_src = "canvas_128_src";
-var canvas_128_dst = "canvas_128_dst";
-
-var imgUrl_256 = "./images/amber_256x256.jpg";
-var canvas_256_src = "canvas_256_src";
-var canvas_256_dst = "canvas_256_dst";
-
-window.onload = function() {
-  loadImage(imgUrl_128, canvas_128_src);
-  loadImage(imgUrl_256, canvas_256_src);
-}
-
-//
-// loadImage()
-//     imageUrl - URL for image to load
-//     canvasId - target canvas ID
-//     completeProc - callback when complete
-//
-function loadImage (imageUrl, canvasId, completeProc=null) {
-  var img = new Image();
-  img.src = imageUrl
-  img.onload=function() {
-    var ctx = document.getElementById(canvasId).getContext("2d");
-    ctx.drawImage(img, 0, 0);
-
-    if (completeProc != null) {
-      completeProc();
-    }
-  }
-}
-
-function contextToTensor (canvasId) {
+function canvasToTensor (canvasId) {
   var ctx = document.getElementById(canvasId).getContext("2d");
 
   const n = 1
@@ -91,7 +122,7 @@ function contextToTensor (canvasId) {
   return out;
 }
 
-function tensorToContext (tensor, canvasId) {
+function tensorToCanvas (tensor, canvasId) {
   const h = tensor.dims[2];
   const w = tensor.dims[3];
   var t_data = tensor.data;
@@ -121,70 +152,57 @@ function tensorToContext (tensor, canvasId) {
   dst_ctx.putImageData(dst_ctx_imgData, 0, 0);
 }
 
-//
-// styleTransfer()
-//     sess - ONNX.js session (from an .onnx)
-//     srcCanvasId - source canvas ID
-//     dstCanvasId - dest canvas ID
-//
-async function styleTransfer(sess, onnxOutputId, srcCanvasId, dstCanvasId) {
-
-  inputTensor = contextToTensor(srcCanvasId);
-  
-  // run inference
-  const t0 = performance.now();
-  const pred = await sess.run([inputTensor]);
-  const t1 = performance.now();
-  
-  // get the result and set it to dest context
-  const output = pred.get(onnxOutputId);
-  tensorToContext (output, dstCanvasId);
-
-  return t1-t0;
-}
-
-var sess = null;
-
-var infer_128 = {
-  modelUrl: "./onnx_models/candy_128x128.onnx",
-  outputNodeName: "433",
-  canvas_src: canvas_128_src,
-  canvas_dst: canvas_128_dst,
-  output_html_id: "predictions_128"
-};
-
-var infer_256 ={
-  modelUrl: "./onnx_models/candy_256x256.onnx",
-  outputNodeName: "433",
-  canvas_src: canvas_256_src,
-  canvas_dst: canvas_256_dst,
-  output_html_id: "predictions_256"
-};
-
-var infer = infer_128;
-
-var counter = 0;
-async function runExample() {
-  counter =0;
-  runInference();
-}
-
-async function runInference(){
-  setCanvasRGB(infer.canvas_dst, 0xFF, 0, 0);
-  //setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
-
-  // load model and create session
-  if (sess == null) {
-    sess = new onnx.InferenceSession();
-    await sess.loadModel(infer.modelUrl);
-  }
+function runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback){
+  setCanvasRGB(dstCanvasId, 0xFF, 0, 0);  // canvas context updating only works in event loop...
+  //inferResults.innerHTML += "1 ";
 
   // run inference
-  inferTime = await styleTransfer (sess, infer.outputNodeName, infer.canvas_src, infer.canvas_dst);
-  outputHtml = document.getElementById(infer.output_html_id);
-  outputHtml.innerHTML += "<p>inference time: " + inferTime + "ms.</p>"; 
+  inputTensor = canvasToTensor(srcCanvasId);
 
-  if (counter++ != 10){
-    setTimeout(()=>{runInference();},1000)
-  }
+  const inferT0 = performance.now();
+  onnxSess.run([inputTensor]).then((pred)=>{
+    const inferT1 = performance.now();
+
+    // get the result and callback complete function
+    const output = pred.get(onnxOutputNodeName);
+    const inferTime = inferT1 - inferT0;
+
+    inferCompleteCallback (output, inferTime);
+
+    counter--;
+    if (counter == 0){
+    } else {
+      setTimeout(()=>{runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback);}, timeOut)
+    }
+  });
+}
+
+var inferTimeList = [];
+function FNSInferCompleteCallback (output, inferTime) {
+    //if ((inferTimeList.length % 2) == 0) {
+      tensorToCanvas (output, dstCanvasId);
+    //}
+
+    inferResults.innerHTML += "inference time: " + inferTime + "<br/>";
+    inferTimeList.push(inferTime);
+}
+
+function onRunFNSInfer() {
+  setCanvasRGB (dstCanvasId, 0xFF, 0, 0);
+
+  var sizeStr = document.getElementById("img_size").value;
+  var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
+
+  onnxSess = new onnx.InferenceSession();
+  
+  inferResults.innerHTML += "loading " + onnxModelUrl + "<br/>";
+  
+  const loadModelT0 = performance.now();
+  onnxSess.loadModel(onnxModelUrl).then(()=>{
+    const loadModelT1 = performance.now();
+    inferResults.innerHTML += "load time: " + (loadModelT1 - loadModelT0) + "<br/>";
+
+    inferTimeList = [];
+    runFNSCount(onnxSess, totalRunCount, inferTimeOut, FNSInferCompleteCallback);
+  });
 }
