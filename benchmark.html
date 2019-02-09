@@ -6,36 +6,20 @@
 <body>
   <font face="verdana">
   <h1>PyTorch Fast Neural Style in ONNX.js</h1>
-  <!--
-    
-  <p>
-    128x128 image:<br/>
-  <canvas id="canvas_128_src" height="128" width="128"></canvas>
-  <img src="images/candy.jpg" height="128" />
-  <canvas id="canvas_128_dst" height="128" width="128"></canvas>
-  <div id="predictions_128"></div>
-  </p>
-  <p>
-    256x256 image:<br/>
-  <canvas id="canvas_256_src" height="256" width="256"></canvas>
-  <img src="images/candy.jpg" height="256" />
-  <canvas id="canvas_256_dst" height="256" width="256"></canvas>
-  <div id="predictions_256"></div>
-  </p>
-  -->
   image size:
-  <select id="img_size" onchange="onSizeSelectChange()">
+  <select id="imgSizeSelect" onchange="onSizeSelectChange()">
     <option value="128" selected="selected">128x128</option>
     <option value="256">256x256</option>
   </select>
   
-  <input type="button" value="Run Style Transfer" onclick="onRunFNSInfer()"/>
+  <input type="button" id="runInferButton" value="Run Fast Neural Style Benchmark" onclick="onRunFNSInfer()"/>
 
   <p>
     
   <div id="inferStyle"></div>
 
   <div id="inferResults"></div>
+  <div id="copyButton"></div>
 </p>
 
 </font>

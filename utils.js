@@ -1,28 +1,78 @@
 
 
-const srcImageBaseUrl  = "./images/amber_###x###.jpg";
-const onnxModelBaseUrl = "./onnx_models/candy_###x###.onnx";
+const srcImageBaseUrl  = "./images/amber_###x###.jpg";       // ### denotes the size of the image
+const onnxModelThumbUrl= "./images/candy.jpg";
+const onnxModelBaseUrl = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 const onnxOutputNodeName = "433";
 
-const srcCanvasId = "canvas_src";
-const dstCanvasId = "canvas_dst";
+const srcCanvasId = "canvas_src"; // loads srcImage
+const dstCanvasId = "canvas_dst"; // outputs inference output
 
-const totalRunCount = 3;
-const inferTimeOut  = 1000; // in ms
+const totalRunCount    = 5;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
+const inferOutputTime  = 1000;  // in ms, time to show the inference output.
+const asyncTimeout     = 100;
 
-// html utilities
-function onSizeSelectChange() {
-  var sizeStr = document.getElementById("img_size").value;
+const floatRounded = 4;     // number of decimal digits to show
+
+// output canvas color during inference
+const dstCanvas_r = 0xFF;
+const dstCanvas_g = 0x00;
+const dstCanvas_b = 0x00;
+
+// inference time array
+var inferTimeList = [];
+
+// html events
+window.onload = function() {
+  var sizeStr = document.getElementById("imgSizeSelect").value;
   
   generateInferStyleHTML(sizeStr);
 }
 
+function onSizeSelectChange() {
+  var sizeStr = document.getElementById("imgSizeSelect").value;
+  
+  generateInferStyleHTML(sizeStr);
+}
+
+function onRunFNSInfer() {
+  var sizeStr = document.getElementById("imgSizeSelect").value;
+  var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
+
+  onnxSess = new onnx.InferenceSession();
+  
+  // reset benchmark output
+  copyButton.innerHTML = "";
+  inferResults.innerHTML = "";
+  inferResults.innerHTML += "loading " + onnxModelUrl + "<br/>";
+  
+  const loadModelT0 = performance.now();
+  onnxSess.loadModel(onnxModelUrl).then( ()=>{
+    const loadModelT1 = performance.now();
+    inferResults.innerHTML += "load time: " + (loadModelT1 - loadModelT0) + "<br/>";
+
+    inferTimeList = [];
+    setTimeout ( ()=>{
+      imgSizeSelect.disabled = true;
+      runInferButton.disabled = true;
+
+        runFNSCount(onnxSess, totalRunCount, inferOutputTime, FNSInferCompleteCallback, FNSRunCompleteCallback);
+    }, asyncTimeout);
+  });
+}
+
+function onCopyToClipboard () {
+  //inferResults.innerHTML.select();
+  inferResults.innerHTML.value.execCommand("copy");
+}
+
+// html utilities
 function generateInferStyleHTML(sizeStr) {
   // generate HTML
   var html = "";
 
   html += "<canvas id='" + srcCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
-  html += "<img src='images/candy.jpg' height=" + sizeStr + " />";
+  html += "<img src='" + onnxModelThumbUrl + "' height=" + sizeStr + " />";
   html += "<canvas id='" + dstCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
 
   inferStyle.innerHTML = html;
@@ -34,12 +84,6 @@ function generateInferStyleHTML(sizeStr) {
 
   // fill dest canvas to green
   setCanvasRGB (dstCanvasId, 0x00, 0xFF, 0x00);
-}
-
-window.onload = function() {
-  var sizeStr = document.getElementById("img_size").value;
-  
-  generateInferStyleHTML(sizeStr);
 }
 
 //
@@ -152,39 +196,12 @@ function tensorToCanvas (tensor, canvasId) {
   dst_ctx.putImageData(dst_ctx_imgData, 0, 0);
 }
 
-function runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback, runCompleteCallback){
-  setCanvasRGB(dstCanvasId, 0xFF, 0, 0);  // canvas context updating only works in event loop...
-  //inferResults.innerHTML += "1 ";
 
-  // run inference
-  inputTensor = canvasToTensor(srcCanvasId);
-
-  const inferT0 = performance.now();
-  onnxSess.run([inputTensor]).then((pred)=>{
-    const inferT1 = performance.now();
-
-    // get the result and callback complete function
-    const output = pred.get(onnxOutputNodeName);
-    const inferTime = inferT1 - inferT0;
-
-    inferCompleteCallback (output, inferTime);
-
-    counter--;
-    if (counter == 0){
-      runCompleteCallback();
-    } else {
-      setTimeout(()=>{runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback, runCompleteCallback);}, timeOut)
-    }
-  });
-}
-
-var inferTimeList = [];
 function FNSInferCompleteCallback (output, inferTime) {
-  //if ((inferTimeList.length % 2) == 0) {
-    tensorToCanvas (output, dstCanvasId);
-  //}
+  tensorToCanvas (output, dstCanvasId);
 
-  inferResults.innerHTML += "inference time: " + inferTime + "<br/>";
+  inferTimeStr = inferTime.toFixed(floatRounded);
+  inferResults.innerHTML += "inference time #" + (inferTimeList.length + 1) + ": " + inferTimeStr + "<br/>";
   inferTimeList.push(inferTime);
 }
 
@@ -196,26 +213,45 @@ function FNSRunCompleteCallback() {
   }
 
   const m = total / (len - 1);
-  
-  inferResults.innerHTML += "average inference time (excluding 1st inference): " + m + "<br/>";
+  const mStr = m.toFixed(floatRounded);
+  inferResults.innerHTML += "average inference time (excluding 1st inference): " + mStr + "<br/>";
+
+  // add copy button
+  copyButton.innerHTML = "<button onclick='onCopyToClipboard()'>Copy to clipboard</button>";
+
+  imgSizeSelect.disabled = false;
+  runInferButton.disabled = false;
 }
 
-function onRunFNSInfer() {
-  setCanvasRGB (dstCanvasId, 0xFF, 0, 0);
+// benchmark function
+function runFNSCount(onnxSess, counter, dispalyTime, inferCompleteCallback, runCompleteCallback){
+  setCanvasRGB(dstCanvasId, dstCanvas_r, dstCanvas_g, dstCanvas_b);  // clear the output canvas
 
-  var sizeStr = document.getElementById("img_size").value;
-  var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
+  // wrap entire inference in a setTimeout() so html gets updated property
+  setTimeout (()=>{
 
-  onnxSess = new onnx.InferenceSession();
-  
-  inferResults.innerHTML += "loading " + onnxModelUrl + "<br/>";
-  
-  const loadModelT0 = performance.now();
-  onnxSess.loadModel(onnxModelUrl).then(()=>{
-    const loadModelT1 = performance.now();
-    inferResults.innerHTML += "load time: " + (loadModelT1 - loadModelT0) + "<br/>";
+    // run inference
+    inputTensor = canvasToTensor(srcCanvasId);
 
-    inferTimeList = [];
-    runFNSCount(onnxSess, totalRunCount, inferTimeOut, FNSInferCompleteCallback, FNSRunCompleteCallback);
-  });
+    const inferT0 = performance.now();
+    onnxSess.run([inputTensor]).then((pred)=>{
+      const inferT1 = performance.now();
+
+      // get the result and callback complete function
+      const output = pred.get(onnxOutputNodeName);
+      const inferTime = inferT1 - inferT0;
+
+      inferCompleteCallback (output, inferTime);
+
+      counter--;
+      if (counter == 0){
+        runCompleteCallback();
+      } else {
+        setTimeout( ()=>{
+          runFNSCount(onnxSess, counter, dispalyTime, inferCompleteCallback, runCompleteCallback);
+        }, dispalyTime);
+      }
+    });
+
+  }, asyncTimeout);
 }
