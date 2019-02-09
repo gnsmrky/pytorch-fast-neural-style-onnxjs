@@ -7,8 +7,8 @@ const onnxOutputNodeName = "433";
 const srcCanvasId = "canvas_src";
 const dstCanvasId = "canvas_dst";
 
-const totalRunCount = 10;
-const inferTimeOut  = 5000; // in ms
+const totalRunCount = 3;
+const inferTimeOut  = 1000; // in ms
 
 // html utilities
 function onSizeSelectChange() {
@@ -152,7 +152,7 @@ function tensorToCanvas (tensor, canvasId) {
   dst_ctx.putImageData(dst_ctx_imgData, 0, 0);
 }
 
-function runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback){
+function runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback, runCompleteCallback){
   setCanvasRGB(dstCanvasId, 0xFF, 0, 0);  // canvas context updating only works in event loop...
   //inferResults.innerHTML += "1 ";
 
@@ -171,20 +171,33 @@ function runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback){
 
     counter--;
     if (counter == 0){
+      runCompleteCallback();
     } else {
-      setTimeout(()=>{runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback);}, timeOut)
+      setTimeout(()=>{runFNSCount(onnxSess, counter, timeOut, inferCompleteCallback, runCompleteCallback);}, timeOut)
     }
   });
 }
 
 var inferTimeList = [];
 function FNSInferCompleteCallback (output, inferTime) {
-    //if ((inferTimeList.length % 2) == 0) {
-      tensorToCanvas (output, dstCanvasId);
-    //}
+  //if ((inferTimeList.length % 2) == 0) {
+    tensorToCanvas (output, dstCanvasId);
+  //}
 
-    inferResults.innerHTML += "inference time: " + inferTime + "<br/>";
-    inferTimeList.push(inferTime);
+  inferResults.innerHTML += "inference time: " + inferTime + "<br/>";
+  inferTimeList.push(inferTime);
+}
+
+function FNSRunCompleteCallback() {
+  const len = inferTimeList.length;
+  var total = 0;
+  for (var i=1; i<len; i++) {
+    total += inferTimeList[i];
+  }
+
+  const m = total / (len - 1);
+  
+  inferResults.innerHTML += "average inference time (excluding 1st inference): " + m + "<br/>";
 }
 
 function onRunFNSInfer() {
@@ -203,6 +216,6 @@ function onRunFNSInfer() {
     inferResults.innerHTML += "load time: " + (loadModelT1 - loadModelT0) + "<br/>";
 
     inferTimeList = [];
-    runFNSCount(onnxSess, totalRunCount, inferTimeOut, FNSInferCompleteCallback);
+    runFNSCount(onnxSess, totalRunCount, inferTimeOut, FNSInferCompleteCallback, FNSRunCompleteCallback);
   });
 }
