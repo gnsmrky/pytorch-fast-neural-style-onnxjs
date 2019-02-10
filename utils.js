@@ -102,12 +102,12 @@ function onRunFNSInfer() {
   inferResultStr += newLine;
 
   // log inference info
-  inferResultStr += "loading " + onnxModelUrl + newLine;
+  inferResultStr += "loading '" + onnxModelUrl + "'" + newLine;
   inferResultsText.innerHTML = inferResultStr;
   
   var loadModelT0 = performance.now();
   onnxSess.loadModel(onnxModelUrl).then( ()=>{
-    var loadModelTStr = formatFloat(performance.now() - loadModelT0);
+    var loadModelTStr = formatFloat(performance.now() - loadModelT0) + "ms";
     inferResultStr += "load time: " + loadModelTStr + newLine;
 
     asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
@@ -117,7 +117,7 @@ function onRunFNSInfer() {
   
       const warmT0 = performance.now();
       onnxSess.run([warmTensor]).then( ()=> {
-        const warmTStr = formatFloat(performance.now() - warmT0);
+        const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
   
         inferResultStr += "warm up time: " + warmTStr + newLine;
         inferResultStr += newLine;
@@ -273,9 +273,10 @@ function FNSRunCompleteCallback() {
   }
 
   const m = total / len;
-  const mStr = formatFloat(m);
+  const mStr = formatFloat(m) + "ms";
 
-  inferResultStr +=  "average inference time: " + mStr + newLine;
+  inferResultStr += newLine;
+  inferResultStr += "average inference time: " + mStr + newLine;
 
   inferResultsText.innerHTML = "```" + newLine + inferResultStr + "```" + newLine;
   inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
@@ -303,7 +304,7 @@ function runFNSCount(){
     const inferT0 = performance.now();
     onnxSess.run([inputTensor]).then((pred)=>{
       const inferTime = performance.now() - inferT0;
-      const inferTimeStr = formatFloat(inferTime);
+      const inferTimeStr = formatFloat(inferTime) + "ms";
 
       inferTimeList.push(inferTime);
 
