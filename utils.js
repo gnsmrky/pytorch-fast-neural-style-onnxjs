@@ -9,7 +9,7 @@ const srcCanvasId = "canvas_src"; // loads srcImage
 const dstCanvasId = "canvas_dst"; // outputs inference output
 
 const totalInferCount    = 30;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
-const inferDisplayTime  = 1000;  // in ms, time to show the inference output.
+const inferDisplayTime  = 100;  // in ms, time to show the inference output.
 const asyncTimeout     = 100;
 
 const floatRounded = 4;     // number of decimal digits to show
@@ -38,7 +38,7 @@ function onSizeSelectChange() {
 }
 
 var onnxSess = null;
-var counter = 0;
+//var counter = 0;
 
 function onRunFNSInfer() {
   var sizeStr = document.getElementById("imgSizeSelect").value;
@@ -51,23 +51,28 @@ function onRunFNSInfer() {
   runInferButton.disabled = true;
 
   // reset benchmark output
+  inferTimeList = [];
+  counter = totalInferCount;
+
   copyButtonDiv.innerHTML = "";
   
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=20></textarea>";
   inferResultsText.innerHTML = "";
   inferResultsText.innerHTML += "loading " + onnxModelUrl + newLine;
   
-  const loadModelT0 = performance.now();
+  var loadModelT0 = performance.now();
   onnxSess.loadModel(onnxModelUrl).then( ()=>{
-    const loadModelT1 = performance.now();
-    inferResultsText.innerHTML += "load time: " + (loadModelT1 - loadModelT0) + newLine;
+    var loadModelTStr = (performance.now() - loadModelT0).toFixed(floatRounded);
+    inferResultsText.innerHTML += "load time: " + loadModelTStr + newLine;
 
     // warmup tensor
     warmTensor = canvasToTensor(srcCanvasId);
+
+    const warmT0 = performance.now();
     onnxSess.run([warmTensor]).then( ()=> {
-  
-      inferTimeList = [];
-      counter = totalInferCount;
+      const warmTStr = (performance.now() - warmT0).toFixed(floatRounded);
+
+      inferResultsText.innerHTML += "warm up time: " + warmTStr + newLine;
       runFNSCount();
 
     });
@@ -213,7 +218,7 @@ function FNSInferCompleteCallback (output, inferTime) {
   tensorToCanvas (output, dstCanvasId);
 
   inferTimeStr = inferTime.toFixed(floatRounded);
-  inferResultsText.innerHTML += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
+  inferResultsText.innerHTML += "inference time #" + (inferTimeList.length + 1) + ": " + inferTimeStr + newLine;
   inferTimeList.push(inferTime);
 }
 
@@ -224,9 +229,9 @@ function FNSRunCompleteCallback() {
     total += inferTimeList[i];
   }
 
-  const m = total / (len - 1);
+  const m = total / len;
   const mStr = m.toFixed(floatRounded);
-  inferResultsText.innerHTML += "average inference time (excluding #0): " + mStr + newLine;
+  inferResultsText.innerHTML += "average inference time: " + mStr + newLine;
 
   // add copy button
   copyButtonDiv.innerHTML = "<button onclick='onCopyToClipboard()'>Copy to clipboard</button>";
