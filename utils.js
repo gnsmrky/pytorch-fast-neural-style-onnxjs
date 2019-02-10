@@ -12,7 +12,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 // global params/vars
 var onnxSess = null;  // onnx.js session
 
-const totalInferCount  = 30;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
+const totalInferCount  = 10;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
 const inferDisplayTime = 100;  // in ms, time to show the inference output.
 const asyncTimeout     = 100;
 
@@ -25,6 +25,7 @@ const dstCanvas_b = 0x00;
 
 // inference time array
 var inferTimeList = [];
+var inferCountDown = 0;
 
 // inference result text
 var inferResultStr = "";
@@ -48,9 +49,9 @@ function formatFloat (f) {
 }
 
 function asyncSetHtml (elemNode, html) {
-  var p = new Promise(function (resolve, reject) {
+  var p = new Promise( (resolve, reject) => {
     elemNode.innerHTML = html;
-    setTimeout (resolve, 3);
+    setTimeout (resolve, 0);
   });
 
   return p;
@@ -65,7 +66,7 @@ function onRunFNSInfer() {
   // reset benchmark output
   inferTimeList = [];
   
-  counter = totalInferCount;
+  inferCountDown = totalInferCount;
   
   // disable UI
   imgSizeSelect.disabled = true;
@@ -76,7 +77,32 @@ function onRunFNSInfer() {
   
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=20></textarea>";
 
-  inferResultStr = "loading " + onnxModelUrl + newLine;
+  inferResultStr = "pytorch fast-neural-style benchmark using onnx.js" + newLine + newLine;
+
+  // log browser info
+  var uap = new UAParser();
+  uap.setUA(navigator.userAgent);
+  var uapRes = uap.getResult();
+
+  inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + newLine;
+  inferResultStr += "os: " + uapRes.os.name + " " + uapRes.os.version + newLine;
+
+  // log gpu info
+  var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
+  if (glCtx == null) {
+    inferResultStr += "cannot get 'webgl' context..." + newLine;
+  } else {
+    var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
+    if (glInfo != null) {
+      inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + newLine;
+    } else {
+      inferResultStr += "gpu: unknown" + newLine;
+    }
+  }
+  inferResultStr += newLine;
+
+  // log inference info
+  inferResultStr += "loading " + onnxModelUrl + newLine;
   inferResultsText.innerHTML = inferResultStr;
   
   var loadModelT0 = performance.now();
@@ -84,7 +110,6 @@ function onRunFNSInfer() {
     var loadModelTStr = formatFloat(performance.now() - loadModelT0);
     inferResultStr += "load time: " + loadModelTStr + newLine;
 
-    //inferResultsText.innerHTML = inferResultStr;
     asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
 
       // warmup tensor
@@ -95,14 +120,12 @@ function onRunFNSInfer() {
         const warmTStr = formatFloat(performance.now() - warmT0);
   
         inferResultStr += "warm up time: " + warmTStr + newLine;
-        //inferResultsText.innerHTML = inferResultStr;
+        inferResultStr += newLine;
+
         asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
           runFNSCount();
-
         });
-  
       });
-
     });
   });
 }
@@ -242,21 +265,10 @@ function tensorToCanvas (tensor, canvasId) {
 }
 
 // FNS Inference functions and callbacks
-function FNSInferCompleteCallback (output, inferTime) {
-  tensorToCanvas (output, dstCanvasId);
-
-  inferTimeStr = formatFloat(inferTime);
-  inferResultStr += "inference time #" + (inferTimeList.length + 1) + ": " + inferTimeStr + newLine;
-  inferResultsText.innerHTML = inferResultStr;
-  inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
-
-  inferTimeList.push(inferTime);
-}
-
 function FNSRunCompleteCallback() {
   const len = inferTimeList.length;
   var total = 0;
-  for (var i=1; i<len; i++) {
+  for (var i=0; i<len; i++) {
     total += inferTimeList[i];
   }
 
@@ -277,33 +289,44 @@ function FNSRunCompleteCallback() {
 
 // benchmark function
 function runFNSCount(){
-    
-  setCanvasRGB(dstCanvasId, dstCanvas_r, dstCanvas_g, dstCanvas_b);  // clear the output canvas
 
-  setTimeout ( () => {
-    // run inference
+  // reset output canvas color
+  var p = new Promise ((resolve, reject) => {
+    setCanvasRGB(dstCanvasId, dstCanvas_r, dstCanvas_g, dstCanvas_b);  // clear the output canvas
+    setTimeout (resolve, 10);
+  });
+
+  p.then( ()=>{
     inputTensor = canvasToTensor(srcCanvasId);
 
+    // run inference
     const inferT0 = performance.now();
-
     onnxSess.run([inputTensor]).then((pred)=>{
-      const inferT1 = performance.now();
+      const inferTime = performance.now() - inferT0;
+      const inferTimeStr = formatFloat(inferTime);
+
+      inferTimeList.push(inferTime);
 
       // get the result and callback complete function
       const output = pred.get(onnxOutputNodeName);
-      const inferTime = inferT1 - inferT0;
+      
+      // set output canvas
+      tensorToCanvas (output, dstCanvasId);
 
-      FNSInferCompleteCallback(output, inferTime);
+      inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
+      asyncSetHtml(inferResultsText, inferResultStr).then( ()=> {
+        inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
 
-      counter--;
-      if (counter == 0){
-        FNSRunCompleteCallback();
-      } else {
-        // give the output canvas some time (dispalyTime) to display
-        setTimeout( ()=>{
-          runFNSCount();
-        }, inferDisplayTime);
-      }
+        inferCountDown--;
+        if (inferCountDown == 0){
+          FNSRunCompleteCallback();
+        } else {
+          // give the output canvas some time (inferDisplayTime) to display
+          setTimeout( ()=>{
+            runFNSCount();
+          }, inferDisplayTime);
+        }
+      });
     });
-  }, asyncTimeout);
+  });
 }
