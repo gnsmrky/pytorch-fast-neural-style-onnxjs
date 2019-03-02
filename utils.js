@@ -4,7 +4,7 @@ const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes th
 
 const onnxModelThumbUrl  = "./images/candy.jpg";
 //const onnxModelBaseUrl   = "./onnx_models/mosaic_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-const onnxModelBaseUrl   = "./onnx_models/candy_nf16_1e10_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
+const onnxModelBaseUrl   = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 const onnxOutputNodeName = "433";  // onnx model output node name
 
 const srcCanvasId = "canvas_src"; // shows srcImage
