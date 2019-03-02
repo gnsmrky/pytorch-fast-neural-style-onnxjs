@@ -1,4 +1,4 @@
-## Run [PyTorch fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style) in web browsers using [ONNX.js](https://github.com/Microsoft/onnxjs)
+## Run [PyTorch fast-neural-style (FNS)](https://github.com/pytorch/examples/tree/master/fast_neural_style) in web browsers using [ONNX.js](https://github.com/Microsoft/onnxjs)
 
 This repository is for anyone interested to run [PyTorch fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style) example in web browsers.  The _performance is by no means optimal_ due to many workarounds for issues and limitations during the conversion process and different operator/layer support level between PyTorch and ONNX.js.  But it serves the purpose to understand what it takes to go through the entire process.
 
@@ -6,11 +6,11 @@ It is an example for practicing and learning what it takes to make the PyTorch g
 
 This project is based on the following open source projects:
 - [PyTorch v1.0.0 - fast-neural-style example](https://github.com/pytorch/examples/tree/master/fast_neural_style) for exporting ONNX model files (.onnx).
-- [ONNX.js v0.1.2 - add example](https://github.com/Microsoft/onnxjs/tree/master/examples/browser/add) for the javascript inference on the web.
+- [ONNX.js v0.1.3 - add example](https://github.com/Microsoft/onnxjs/tree/master/examples/browser/add) for the javascript inference on the web.
 
 ## Simple goal - Inference on the web
-The objective is simple: 
-<p align="center"><b>PyTorch models --> .onnx files --> ONNX.js to run inference on the web.</b></p>
+The objective is simple:  
+<p align="center"><b>PyTorch FNS example --> PyTorch model files (.pth) --> ONNX model files --> ONNX.js on web browsers</b></p>
 
 There are many style transfer implementations.  PyTorch's fast-neural-style example is the most facinating one.  Partly due to the way it is implemented provides a much finer style-transfered images.  To run the inference in browser, the following 3 major steps are taken:
 
@@ -30,7 +30,7 @@ The following were the major obstacles encountered during the process:
    * ONNX.js operators - [https://github.com/Microsoft/onnxjs/blob/master/docs/operators.md](https://github.com/Microsoft/onnxjs/blob/master/docs/operators.md)
    * PyTorch `nn.InstanceNorm2d()` is exported as ONNX `InstanceNormalization()`, but not supported by ONNX.js.
    * PyTorch `nn.functional.interpolate()` is exported as ONNX `Upsample()`, but not supported in ONNX.js.
-   * At time of writing (Jan, 2019), PyTorch ONNX export at opset version 9 by default.  ONNX.js at ONNX opset version 7.
+   * At time of writing (Jan, 2019), PyTorch ONNX export at opset version 9 by default.  ONNX.js at ONNX opset version 7.  
 
 2. **Base tensor opset levels are different.**
    * PyTorch ONNX export only supports reduction operation, such as `mean()`,  along 1 axis.  i.e. `torch.mean(t, [2,3])` is not supported by PyTorch ONNX export.  (Although both PyTorch and ONNX.js supports multi-axis reduction ops.)
@@ -43,20 +43,6 @@ The following were the major obstacles encountered during the process:
 
 4. **Dynamic tensor shapes exported by PyTorch ONNX is *very* large and hogs memory like hell.**
    * If any op node depends on input/out tensor shape dynamically when doing inferencing, the result ONNX model graph can be absurdly huge (.onnx file at ~350MB) and highly complex (Composed of multiple `Reshape` and `Gather` ops).  Although still works, it is not practical to use such model files in web browsers.
-
-## Tactical ways to workaround all roadblocks
-It is frustrating for a deep learning beginner, like me, to go through various frameworks, model formats, model conversions, when developing and deploying a deep learning application.  Usually a deep learning framework comes with various examples.  Running such examples within the accompanied framework is usually ok.  Running examples in another framework, however, requires model conversion and the knowledge about the target framework.
-
-One major goal is to minimize the changes in both PyTorch and ONNX.js as both frameworks are being updated frequently.  This is true particularly for ONNX.js as it is still in heavy development cycles.  
-
-Thus, the following technicques were used:
-1. The only change for PyTorch is to change the default export opset level from 9 to 7.
-2. No change to ONNX.js.
-3. Break down the un-supported `InstanceNorm` and `Upsample` ops to basic ops.
-   * Rewrite using the basic ops and make sure the ops run correctly in ONNX.js.
-   * Optimize the re-written ops so the performance is optimal in ONNX.js.  (Involves repeative tries with different basic ops and benchmark in ONNX.js.)
-4. Make sure the pre-trained PyTorch weights and models (.pth and .model files) can still be used.
-   * _So no re-training is needed._
 
 For details, please see [gnsmrky's PyTorch fast-neural-style for ONNX.js repo](www.github.com)
 
