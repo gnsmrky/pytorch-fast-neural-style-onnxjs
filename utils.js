@@ -1,11 +1,10 @@
 
-
 const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
 
 const onnxModelThumbUrl  = "./images/candy.jpg";
 //const onnxModelBaseUrl   = "./onnx_models/mosaic_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 const onnxModelBaseUrl   = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-const onnxOutputNodeName = "433";  // onnx model output node name
+//const onnxOutputNodeName = "433";  // onnx model output node name
 
 const srcCanvasId = "canvas_src"; // shows srcImage
 const dstCanvasId = "canvas_dst"; // outputs inference output
@@ -13,7 +12,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 // global params/vars
 var onnxSess = null;  // onnx.js session
 
-const totalInferCount  = 3;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
+const totalInferCount  = 10;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
 const inferDisplayTime = 100;  // in ms, time to show the inference output.
 const asyncTimeout     = 100;
 
@@ -78,7 +77,20 @@ function onRunFNSInfer() {
   
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=20></textarea>";
 
-  inferResultStr = "pytorch fast-neural-style benchmark using onnx.js" + newLine + newLine;
+  inferResultStr = "PyTorch fast-neural-style (FNS) benchmark using ONNX.js " + onnxjs_version + newLine;
+
+  // date & time
+  const currentDate = new Date();
+
+  var date  = currentDate.getDate();
+  var month = currentDate.getMonth();
+  var year  = currentDate.getFullYear();
+  var hour  = currentDate.getHours();
+  var min   = currentDate.getMinutes();
+  var sec   = currentDate.getSeconds();
+  var dateStr = year + "/" + (month + 1) + "/" + date + "     " + hour + ":" + min + ":" + sec  + newLine + newLine;
+
+  inferResultStr += "Date: " + dateStr;
 
   // log browser info
   var uap = new UAParser();
@@ -117,7 +129,7 @@ function onRunFNSInfer() {
       warmTensor = canvasToTensor(srcCanvasId);
   
       const warmT0 = performance.now();
-      onnxSess.run([warmTensor]).then( ()=> {
+      onnxSess.run([warmTensor]).then( (output)=> {
         const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
   
         inferResultStr += "warm up time: " + warmTStr + newLine;
@@ -310,7 +322,9 @@ function runFNSCount(){
       inferTimeList.push(inferTime);
 
       // get the result and callback complete function
-      const output = pred.get(onnxOutputNodeName);
+      //const output = pred.get(onnxOutputNodeName);
+      const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
+                                                  //    only for the case of single output node.  
       
       // set output canvas
       tensorToCanvas (output, dstCanvasId);
