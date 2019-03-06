@@ -1,0 +1,32 @@
+<html>
+<title>PyTorch fast-neural-style running in web browser</title>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.4/dist/onnx.min.js"></script>
+
+<body>
+PyTorch fast-neural-style running in web browser
+
+<script>
+    // create a session
+    const myOnnxSession = new onnx.InferenceSession({backendHint: 'cpu'});
+
+    // load the ONNX model file
+    myOnnxSession.loadModel("./onnx_models/candy_128x128_wasm.onnx").then(()=>{
+
+    // generate model input
+    const x = new Float32Array(1*3*128*128).fill(1);
+    const inferenceInputs = new onnx.Tensor(x, 'float32', [1,3,128,128]);
+
+    // execute the model
+    myOnnxSession.run([inferenceInputs]).then(output=>{
+        // consume the output
+        const outputTensor = output.values().next().value;
+        //console.log(`model output tensor: ${outputTensor.data}.`);
+        console.log(`model output tensor size: ${outputTensor.size}`);
+        });
+    })
+    </script>
+
+</body>
+</html>
+
