@@ -3,7 +3,8 @@ const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes th
 
 const onnxModelThumbUrl  = "./images/candy.jpg";
 //const onnxModelBaseUrl   = "./onnx_models/mosaic_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-const onnxModelBaseUrl   = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
+const onnxModelBaseUrl   = "./onnx_models/candy_nc16_###x###_wasm.onnx"; // ### denotes different onnx models, corresponding to different image sizes
+//const onnxModelBaseUrl   = "./onnx_models/candy_###x###_onnxjs013.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 //const onnxOutputNodeName = "433";  // onnx model output node name
 
 const srcCanvasId = "canvas_src"; // shows srcImage
@@ -61,7 +62,8 @@ function onRunFNSInfer() {
   var sizeStr = document.getElementById("imgSizeSelect").value;
   var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
 
-  onnxSess = new onnx.InferenceSession();
+  //onnxSess = new onnx.InferenceSession();
+  onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
 
   // reset benchmark output
   inferTimeList = [];
