@@ -44,6 +44,24 @@ The following were the major obstacles encountered during the process:
 4. **Dynamic tensor shapes exported by PyTorch ONNX is *very* large and hogs memory like hell.**
    * If any op node depends on input/out tensor shape dynamically when doing inferencing, the result ONNX model graph can be absurdly huge (.onnx file at ~350MB) and highly complex (Composed of multiple `Reshape` and `Gather` ops).  Although still works, it is not practical to use such model files in web browsers.
 
+## Tactical ways to workaround all roadblocks
+It is frustrating for a deep learning beginner, like me, to go through various frameworks, model formats, model conversions, when developing and deploying a deep learning application.  Usually a deep learning framework comes with various examples.  Running such examples within the accompanied framework is usually ok.  Running examples in another framework, however, requires model conversion and the knowledge about the target framework.
+
+One technique is to minimize the changes in both PyTorch and ONNX.js as both frameworks are being updated frequently.  This is true particularly for ONNX.js as it is still in heavy development cycles.  
+
+Doing so also limits the changes in just one place: PyTorch's fast-neural-style example.  *A crucial technique for rapid iterative cycles.*
+
+Thus, steps being followed:
+1. The only change for PyTorch is to change the default ONNX export opset level from 9 to 7.
+   * So the exported .onnx file runs in ONNX.js.
+2. **No changes needed for ONNX.js.**
+   * ONNX.js should work as-is.
+3. In PyTorch fast-neural-style, break down the un-supported `InstanceNorm` and `Upsample` ops to basic ops.
+   * Rewrite using the basic ops and make sure the ops run correctly in ONNX.js.
+   * Optimize the re-written ops so the performance is optimal in ONNX.js.  (Involves repeative tries with different basic ops and benchmark in ONNX.js.)
+4. Make sure the pre-trained PyTorch weights and models (.pth and .model files) can still be used.
+   * _So no re-training is needed._
+
 For details, please see [gnsmrky's PyTorch fast-neural-style for ONNX.js repo](www.github.com)
 
 ## Run inference locally with `node.js`
