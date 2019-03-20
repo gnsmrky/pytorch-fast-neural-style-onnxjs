@@ -1,9 +1,9 @@
 
 const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
 
-const onnxModelThumbUrl  = "./images/candy.jpg";
-//const onnxModelBaseUrl   = "./onnx_models/mosaic_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-const onnxModelBaseUrl   = "./onnx_models/candy_nc16_###x###_wasm.onnx"; // ### denotes different onnx models, corresponding to different image sizes
+const onnxModelThumbUrl  = "./images/mosaic.jpg";
+//const onnxModelBaseUrl   = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
+const onnxModelBaseUrl   = "./onnx_models/mosaic_nc8_###x###_onnxjs014.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 //const onnxModelBaseUrl   = "./onnx_models/candy_###x###_onnxjs013.onnx"; // ### denotes different onnx models, corresponding to different image sizes
 //const onnxOutputNodeName = "433";  // onnx model output node name
 
@@ -13,7 +13,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 // global params/vars
 var onnxSess = null;  // onnx.js session
 
-const totalInferCount  = 10;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
+const totalInferCount  = 50;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
 const inferDisplayTime = 100;  // in ms, time to show the inference output.
 const asyncTimeout     = 100;
 
@@ -62,8 +62,8 @@ function onRunFNSInfer() {
   var sizeStr = document.getElementById("imgSizeSelect").value;
   var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
 
-  //onnxSess = new onnx.InferenceSession();
-  onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
+  onnxSess = new onnx.InferenceSession();
+  //onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
 
   // reset benchmark output
   inferTimeList = [];
