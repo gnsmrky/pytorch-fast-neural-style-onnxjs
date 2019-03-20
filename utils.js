@@ -1,19 +1,38 @@
 
-const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
+//const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
 
-const onnxModelThumbUrl  = "./images/mosaic.jpg";
-//const onnxModelBaseUrl   = "./onnx_models/candy_###x###.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-const onnxModelBaseUrl   = "./onnx_models/mosaic_nc8_###x###_onnxjs014.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-//const onnxModelBaseUrl   = "./onnx_models/candy_###x###_onnxjs013.onnx"; // ### denotes different onnx models, corresponding to different image sizes
-//const onnxOutputNodeName = "433";  // onnx model output node name
+// model list
+const style_mosaic_nc8_128x128 = {
+  style_name: "mosaic 128x128 (nc8)",
+  content_url: "./images/amber_128x128.jpg",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_128x128_onnxjs014.onnx"
+};
 
+const style_mosaic_nc8_256x256 = {
+  style_name: "mosaic 256x256 (nc8)",
+  content_url: "./images/amber_256x256.jpg",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
+};
+
+const style_list = [
+  style_mosaic_nc8_128x128,
+  style_mosaic_nc8_256x256
+];
+
+// html elements
 const srcCanvasId = "canvas_src"; // shows srcImage
 const dstCanvasId = "canvas_dst"; // outputs inference output
 
 // global params/vars
 var onnxSess = null;  // onnx.js session
 
-const totalInferCount  = 50;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
+const totalInferCount  = 10;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
 const inferDisplayTime = 100;  // in ms, time to show the inference output.
 const asyncTimeout     = 100;
 
@@ -34,15 +53,23 @@ const newLine = String.fromCharCode(13, 10);
 
 // html events
 window.onload = function() {
-  var sizeStr = document.getElementById("imgSizeSelect").value;
+  for (i=0; i<style_list.length; i++) {
+    if (i==0) {
+      imgSizeSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + style_list[i].style_name + "</option>";
+    } else {
+      imgSizeSelect.innerHTML += "<option value='" + i + "'>" + style_list[i].style_name + "</option>";
+    }
+  }
+
+  var styleIdx = document.getElementById("imgSizeSelect").value;
   
-  generateInferStyleHTML(sizeStr);
+  generateInferStyleHTML(styleIdx);
 }
 
 function onSizeSelectChange() {
-  var sizeStr = document.getElementById("imgSizeSelect").value;
+  var styleIdx = document.getElementById("imgSizeSelect").value;
   
-  generateInferStyleHTML(sizeStr);
+  generateInferStyleHTML(styleIdx);
 }
 
 function formatFloat (f) {
@@ -59,9 +86,12 @@ function asyncSetHtml (elemNode, html) {
 }
 
 function onRunFNSInfer() {
-  var sizeStr = document.getElementById("imgSizeSelect").value;
-  var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
+  const styleIdx = document.getElementById("imgSizeSelect").value;
+  const style = style_list[styleIdx];
 
+  //var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
+  const onnxModelUrl = style.model_url;
+  
   onnxSess = new onnx.InferenceSession();
   //onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
 
@@ -151,18 +181,21 @@ function onCopyToClipboard () {
 }
 
 // html utilities
-function generateInferStyleHTML(sizeStr) {
+function generateInferStyleHTML(styleIdx) {
+  style = style_list[styleIdx];
+
   // generate HTML
   var html = "";
 
-  html += "<canvas id='" + srcCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
-  html += "<img src='" + onnxModelThumbUrl + "' height=" + sizeStr + " />";
-  html += "<canvas id='" + dstCanvasId + "' height=" + sizeStr + " width=" + sizeStr + " ></canvas>";
+  html += "<canvas id='" + srcCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+  html += "<img src='"   + style.thumb_url + "' height=" + style.height + " />";
+  html += "<canvas id='" + dstCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>";
 
   inferStyleDiv.innerHTML = html;
 
   // load source image
-  imgUrl = srcImageBaseUrl.replace(/###/g,sizeStr);
+  //imgUrl = srcImageBaseUrl.replace(/###/g,style.width);
+  imgUrl = style.content_url;
 
   loadImage (imgUrl, srcCanvasId);
 
