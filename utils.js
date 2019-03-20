@@ -2,6 +2,7 @@
 //const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
 
 // model list
+// mosaic - nc8
 const style_mosaic_nc8_128x128 = {
   style_name: "mosaic 128x128 (nc8)",
   content_url: "./images/amber_128x128.jpg",
@@ -20,9 +21,54 @@ const style_mosaic_nc8_256x256 = {
   model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
 };
 
+// mosaic - nc16
+const style_mosaic_nc16_128x128 = {
+  style_name: "mosaic 128x128 (nc16)",
+  content_url: "./images/amber_128x128.jpg",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc16_128x128_onnxjs014.onnx"
+};
+
+const style_mosaic_nc16_256x256 = {
+  style_name: "mosaic 256x256 (nc16)",
+  content_url: "./images/amber_256x256.jpg",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc16_256x256_onnxjs014.onnx"
+};
+
+/*
+// candy
+const style_candy_nc8_128x128 = {
+  style_name: "candy 128x128 (nc8)",
+  content_url: "./images/amber_128x128.jpg",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/candy.jpg",
+  model_url: "./onnx_models/candy_nc8_128x128_onnxjs014.onnx"
+};
+
+const style_candy_nc8_256x256 = {
+  style_name: "candy 256x256 (nc8)",
+  content_url: "./images/amber_256x256.jpg",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/candy.jpg",
+  model_url: "./onnx_models/candy_nc8_256x256_onnxjs014.onnx"
+};
+*/
+
 const style_list = [
   style_mosaic_nc8_128x128,
-  style_mosaic_nc8_256x256
+  style_mosaic_nc8_256x256,
+  style_mosaic_nc16_128x128,
+  style_mosaic_nc16_256x256,
+
+  //style_candy_nc8_128x128,
+  //style_candy_nc8_256x256
 ];
 
 // html elements
@@ -91,7 +137,7 @@ function onRunFNSInfer() {
 
   //var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
   const onnxModelUrl = style.model_url;
-  
+
   onnxSess = new onnx.InferenceSession();
   //onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
 
