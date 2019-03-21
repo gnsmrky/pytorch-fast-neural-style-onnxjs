@@ -2,7 +2,7 @@
 //const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
 
 // model list
-// mosaic - nc8
+// mosaic - webgl - nc8
 const style_mosaic_nc8_128x128 = {
   style_name: "mosaic 128x128 (nc8)",
   content_url: "./images/amber_128x128.jpg",
@@ -21,7 +21,7 @@ const style_mosaic_nc8_256x256 = {
   model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
 };
 
-// mosaic - nc16
+// mosaic - webgl - nc16
 const style_mosaic_nc16_128x128 = {
   style_name: "mosaic 128x128 (nc16)",
   content_url: "./images/amber_128x128.jpg",
@@ -38,6 +38,26 @@ const style_mosaic_nc16_256x256 = {
   height: 256,
   thumb_url: "./images/mosaic.jpg",
   model_url: "./onnx_models/mosaic_nc16_256x256_onnxjs014.onnx"
+};
+
+
+// mosaic - cpu - nc8
+const style_mosaic_nc8_128x128_cpu = {
+  style_name: "mosaic 128x128 (nc8)",
+  content_url: "./images/amber_128x128.jpg",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_128x128_onnxjs014_cpu.onnx"
+};
+
+const style_mosaic_nc8_256x256_cpu = {
+  style_name: "mosaic 256x256 (nc8)",
+  content_url: "./images/amber_256x256.jpg",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014_cpu.onnx"
 };
 
 /*
@@ -61,14 +81,16 @@ const style_candy_nc8_256x256 = {
 };
 */
 
-const style_list = [
+const style_list_webgl = [
   style_mosaic_nc8_128x128,
   style_mosaic_nc8_256x256,
   style_mosaic_nc16_128x128,
   style_mosaic_nc16_256x256,
+];
 
-  //style_candy_nc8_128x128,
-  //style_candy_nc8_256x256
+const style_list_cpu = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu,
 ];
 
 // html elements
@@ -79,8 +101,8 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 var onnxSess = null;  // onnx.js session
 
 const totalInferCount  = 10;    // total number of inferences to run.  (should be > 1, as 1st inference run always takes longer for building up the backend kernels.)
-const inferDisplayTime = 100;  // in ms, time to show the inference output.
-const asyncTimeout     = 100;
+const inferDisplayTime = 50;  // in ms, time to show the inference output.
+const asyncTimeout     = 10;
 
 const floatRounded = 3;     // number of decimal digits to show
 
@@ -99,21 +121,44 @@ const newLine = String.fromCharCode(13, 10);
 
 // html events
 window.onload = function() {
-  for (i=0; i<style_list.length; i++) {
+  htmlGenerateStyleList(style_list_webgl);
+}
+
+function htmlGenerateStyleList(list) {
+  styleSelect.innerHTML = "";
+  for (i=0; i<list.length; i++) {
     if (i==0) {
-      imgSizeSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + style_list[i].style_name + "</option>";
+      styleSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].style_name + "</option>";
     } else {
-      imgSizeSelect.innerHTML += "<option value='" + i + "'>" + style_list[i].style_name + "</option>";
+      styleSelect.innerHTML += "<option value='" + i + "'>" + list[i].style_name + "</option>";
     }
   }
 
-  var styleIdx = document.getElementById("imgSizeSelect").value;
+  var styleIdx = document.getElementById("styleSelect").value;
   
   generateInferStyleHTML(styleIdx);
 }
 
+function getStyleList () {
+  const backend = document.getElementById("backendSelect").value;
+
+  if (backend == 'webgl') {
+    return style_list_webgl;
+  } else if (backend == 'cpu') {
+    return style_list_cpu;
+  } else {
+    return style_list_webgl;
+  }
+}
+
+function onBackendChange() {
+  // re-generate style list
+  const style_list = getStyleList();
+  htmlGenerateStyleList(style_list);
+}
+
 function onSizeSelectChange() {
-  var styleIdx = document.getElementById("imgSizeSelect").value;
+  var styleIdx = document.getElementById("styleSelect").value;
   
   generateInferStyleHTML(styleIdx);
 }
@@ -132,14 +177,15 @@ function asyncSetHtml (elemNode, html) {
 }
 
 function onRunFNSInfer() {
-  const styleIdx = document.getElementById("imgSizeSelect").value;
-  const style = style_list[styleIdx];
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
 
   //var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
   const onnxModelUrl = style.model_url;
-
-  onnxSess = new onnx.InferenceSession();
-  //onnxSess = new onnx.InferenceSession({backendHint: 'wasm'});
+  
+  const backend = document.getElementById("backendSelect").value;
+  //onnxSess = new onnx.InferenceSession();
+  onnxSess = new onnx.InferenceSession({backendHint: backend});
 
   // reset benchmark output
   inferTimeList = [];
@@ -147,7 +193,7 @@ function onRunFNSInfer() {
   inferCountDown = totalInferCount;
   
   // disable UI
-  imgSizeSelect.disabled = true;
+  styleSelect.disabled = true;
   runInferButton.disabled = true;
 
   // html text area
@@ -175,8 +221,14 @@ function onRunFNSInfer() {
   uap.setUA(navigator.userAgent);
   var uapRes = uap.getResult();
 
+  inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + newLine;
   inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + newLine;
-  inferResultStr += "os: " + uapRes.os.name + " " + uapRes.os.version + newLine;
+  inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + newLine;
+
+  inferResultStr += newLine;
+  
+  // log cpu arch info
+  inferResultStr += "cpu arch: " + uapRes.cpu.architecture + newLine;
 
   // log gpu info
   var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
@@ -192,6 +244,9 @@ function onRunFNSInfer() {
   }
   inferResultStr += newLine;
 
+  // log backend info
+  inferResultStr += "ONNX.js backend: " + backend + newLine;
+
   // log inference info
   inferResultStr += "loading '" + onnxModelUrl + "'" + newLine;
   inferResultsText.innerHTML = inferResultStr;
@@ -200,6 +255,8 @@ function onRunFNSInfer() {
   onnxSess.loadModel(onnxModelUrl).then( ()=>{
     var loadModelTStr = formatFloat(performance.now() - loadModelT0) + "ms";
     inferResultStr += "load time: " + loadModelTStr + newLine;
+
+    inferResultStr += "warming up tensors... " + newLine;
 
     asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
 
@@ -228,7 +285,7 @@ function onCopyToClipboard () {
 
 // html utilities
 function generateInferStyleHTML(styleIdx) {
-  style = style_list[styleIdx];
+  style = getStyleList()[styleIdx];
 
   // generate HTML
   var html = "";
@@ -378,7 +435,7 @@ function FNSRunCompleteCallback() {
   // add copy button
   copyButtonDiv.innerHTML = "<button onclick='onCopyToClipboard()'>Copy to clipboard</button>";
 
-  imgSizeSelect.disabled = false;
+  styleSelect.disabled = false;
   runInferButton.disabled = false;
 }
 
