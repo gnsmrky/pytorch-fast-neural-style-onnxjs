@@ -85,12 +85,12 @@ const style_list_webgl = [
   style_mosaic_nc8_128x128,
   style_mosaic_nc8_256x256,
   style_mosaic_nc16_128x128,
-  style_mosaic_nc16_256x256,
+  style_mosaic_nc16_256x256
 ];
 
 const style_list_cpu = [
   style_mosaic_nc8_128x128_cpu,
-  style_mosaic_nc8_256x256_cpu,
+  style_mosaic_nc8_256x256_cpu
 ];
 
 // html elements
@@ -226,7 +226,7 @@ function onRunFNSInfer() {
   inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + newLine;
 
   inferResultStr += newLine;
-  
+
   // log cpu arch info
   inferResultStr += "cpu arch: " + uapRes.cpu.architecture + newLine;
 
