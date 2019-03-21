@@ -125,7 +125,7 @@ window.onload = function() {
 }
 
 function htmlGenerateStyleList(list) {
-  styleSelect.innerHTML = "abc";
+  styleSelect.innerHTML = "";
   for (i=0; i<list.length; i++) {
     if (i==0) {
       styleSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].style_name + "</option>";
@@ -134,9 +134,9 @@ function htmlGenerateStyleList(list) {
     }
   }
 
-  var styleIdx = document.getElementById("styleSelect").value;
+  //var styleIdx = document.getElementById("styleSelect").value;
   
-  generateInferStyleHTML(styleIdx);
+  htmlGenerateInferStyle(0);
 }
 
 function getStyleList () {
@@ -160,7 +160,7 @@ function onBackendChange() {
 function onSizeSelectChange() {
   var styleIdx = document.getElementById("styleSelect").value;
   
-  generateInferStyleHTML(styleIdx);
+  htmlGenerateInferStyle(styleIdx);
 }
 
 function formatFloat (f) {
@@ -284,7 +284,7 @@ function onCopyToClipboard () {
 }
 
 // html utilities
-function generateInferStyleHTML(styleIdx) {
+function htmlGenerateInferStyle(styleIdx) {
   style = getStyleList()[styleIdx];
 
   // generate HTML
