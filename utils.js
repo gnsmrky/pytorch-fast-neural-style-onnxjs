@@ -125,7 +125,7 @@ window.onload = function() {
 }
 
 function htmlGenerateStyleList(list) {
-  styleSelect.innerHTML = "";
+  styleSelect.innerHTML = "abc";
   for (i=0; i<list.length; i++) {
     if (i==0) {
       styleSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].style_name + "</option>";
