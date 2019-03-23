@@ -53,27 +53,6 @@ const style_mosaic_nc8_256x256_cpu = {
   model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014_cpu.onnx"
 };
 
-/*
-// candy
-const style_candy_nc8_128x128 = {
-  style_name: "candy 128x128 (nc8)",
-  content_url: "./images/amber_128x128.jpg",
-  width: 128,
-  height: 128,
-  thumb_url: "./images/candy.jpg",
-  model_url: "./onnx_models/candy_nc8_128x128_onnxjs014.onnx"
-};
-
-const style_candy_nc8_256x256 = {
-  style_name: "candy 256x256 (nc8)",
-  content_url: "./images/amber_256x256.jpg",
-  width: 256,
-  height: 256,
-  thumb_url: "./images/candy.jpg",
-  model_url: "./onnx_models/candy_nc8_256x256_onnxjs014.onnx"
-};
-*/
-
 const style_list_webgl = [
   style_mosaic_nc8_128x128,
   style_mosaic_nc8_256x256,
@@ -86,19 +65,15 @@ const style_list_cpu = [
   style_mosaic_nc8_256x256_cpu
 ];
 
-const content_cat = {
-  name: "cat",
-  img_url: "./images/cat.jpg"
-}
-
-const content_amber = {
-  name: "amber",
-  img_url: "./images/amber_256x256.jpg"
-}
-
+// content images
 const content_url_list = [
-  content_cat,
-  content_amber,
+  { name:"amber",     img_url:"./images/amber_256x256.jpg", credit_url: "unsplash.com" },
+  { name:"boy",       img_url:"./images/boy.jpg", credit_url: "unsplash.com" },
+  { name:"boat",      img_url:"./images/boat.jpg", credit_url: "unsplash.com" },
+  { name:"cat",       img_url:"./images/cat.jpg", credit_url: "unsplash.com" },
+  { name:"flower",    img_url:"./images/flower.jpg", credit_url: "unsplash.com" },
+  { name:"lake house",img_url:"./images/lake_house.jpg", credit_url: "unsplash.com" },
+  { name:"urban_sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
 ];
 
 // html elements
@@ -286,6 +261,7 @@ function htmlGenerateInferStyle(styleIdx, contentImgIdx){
 function htmlGenerateUI () {
   htmlGenerateStyleList   (styleSelect);
   htmlGenerateContentList (contentImgSelect);
+  htmlGenerateResult      ();
 }
 
 function htmlGenerateStyleList (styleListElem) {
@@ -299,17 +275,33 @@ function htmlGenerateStyleList (styleListElem) {
     }
   }
 
-  htmlGenerateInferStyle(0);
+  htmlGenerateStyle(0);
 }
 
-function htmlGenerateInferStyle(styleIdx) {
+function htmlGenerateStyle(styleIdx) {
   style = getStyleList()[styleIdx];
 
   // generate HTML
   var html = "";
-  html += "<img src='"   + style.thumb_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<img src='" + style.thumb_url + "' height=" + style.height + " />" + "&nbsp;";
 
   inferStyleDiv.innerHTML = html;
+}
+
+function onStyleSelectChange() {
+  // update style list and thumbnail
+  const styleIdx = document.getElementById("styleSelect").value;
+  htmlGenerateStyle(styleIdx);
+
+  // update content image so size matches the style size
+  const contentIdx = document.getElementById("contentImgSelect").value;
+  htmlGenerateContent(contentIdx);
+
+  // update stylized image so the size mathes the style size
+  htmlGenerateResult ();
+
+  // dispose inference session
+  g_onnxSess = null;
 }
 
 function htmlGenerateContentList(contentImgList) {
@@ -318,40 +310,69 @@ function htmlGenerateContentList(contentImgList) {
   
   for (i=0; i<list.length; i++) {
     if (i==0) {
-      contentImgList.innerHTML += "<option value='" + list[i].img_url + "' selected='selected'>" + list[i].name + "</option>";
+      contentImgList.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].name + "</option>";
     } else {
-      contentImgList.innerHTML += "<option value='" + list[i].img_url + "'>" + list[i].name + "</option>";
+      contentImgList.innerHTML += "<option value='" + i + "'>" + list[i].name + "</option>";
     }
   }
+
+  htmlGenerateContent(0);
 }
 
-function onStyleSelectChange() {
+function htmlGenerateContent(contentIdx, callback) {
   const styleIdx = document.getElementById("styleSelect").value;
-  htmlGenerateInferStyle(styleIdx);
+  const style = getStyleList()[styleIdx];
+
+  const content = getContentList()[contentIdx];
+  
+  // generate content image HTML
+  var html = "";
+  //html += "<img src='"   + content.img_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<canvas id='" + srcCanvasId + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+
+  contentImgDiv.innerHTML = html;
+  loadImage (content.img_url, srcCanvasId, callback);
+
+  // generate image credit
+  html = "<a href='https://" + content.credit_url + "'>" + content.credit_url + "</a>";
+  contentImgCredit.innerHTML = html;
 }
 
 function onContentImgSelectChange() {
+  const contentIdx = document.getElementById("contentImgSelect").value;
+  htmlGenerateContent(contentIdx, onRunFNSInfer);  // run style infer upon new content image is loaded
 
+  //onRunFNSInfer();
+}
+
+function htmlGenerateResult (){
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
+
+  html = "<canvas id='" + dstCanvasId + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+  outputImgDiv.innerHTML = html;
 }
 
 async function onRunFNSInfer () {
-  const styleIdx = document.getElementById("styleBenchSelect").value;
+  const styleIdx = document.getElementById("styleSelect").value;
   const style = getStyleList()[styleIdx];
 
   const onnxModelUrl = style.model_url;
   
   const backend = document.getElementById("backendSelect").value;
 
+  inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
+
   // cache inference session so it can be re-used for newly selected content image
   if (g_onnxSess == null) {
     g_onnxSess = new onnx.InferenceSession({backendHint: backend});
+    await g_onnxSess.loadModel(onnxModelUrl);
   }
 
-  inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
-  
-  inferResultStr = "loading onnx model..." + newLine;
+  //inferResultStr = "loading onnx model..." + newLine;
+  inferResultStr = "";
   asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
-    g_onnxSess.loadModel(onnxModelUrl).then( ()=> {
+    //g_onnxSess.loadModel(onnxModelUrl).then( ()=> {
       srcTensor = canvasToTensor(srcCanvasId);
 
       inferResultStr += "running fast neural style..." + newLine;
@@ -368,7 +389,7 @@ async function onRunFNSInfer () {
           });
         });
       });
-    });
+    //});
   });
 }
 

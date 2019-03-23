@@ -23,17 +23,24 @@
   <p>
     <table>
         <tr>
-            <td>Style list:&nbsp;
-                <select id="styleSelect" onchange="onStyleSelectChange()"></select>
-                <div id="inferStyleDiv"></div>
-            </td>
-            <td>Image List:&nbsp;
-                <select id="contentImgSelect" onchange="onContentImgSelectChange()"></select>
-                <div id="contentImgDiv"></div>
-            </td>
-            <td>
-                 <div id="outputImgDiv"></div>
-            </td>
+            <td align='center'><b>Style</b></td>
+            <td align='center'><b>Image</b></td>
+            <td align='center'><b>Stylized</b></td>
+        </tr>
+        <tr>
+            <td align='center'><div id="inferStyleDiv"></div></td>
+            <td align='center'><div id="contentImgDiv"></div></td>
+            <td align='center'><div id="outputImgDiv"></div></td>
+        </tr>
+        <tr>
+            <td align='center'>&nbsp;</td>
+            <td align='center'><div id="contentImgCredit"></div></td>
+            <td align='center'>&nbsp;</td>
+        </tr>
+        <tr>
+            <td align='center'><select id="styleSelect" onchange="onStyleSelectChange()"></select></td>
+            <td align='center'><select id="contentImgSelect" onchange="onContentImgSelectChange()"></select></td>
+            <td align='center'>&nbsp;</td>
         </tr>
     </table>
   </p>
