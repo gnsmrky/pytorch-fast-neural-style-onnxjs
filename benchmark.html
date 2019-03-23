@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
   <script src="./utils.js"></script>
 </head>
-<body>
+<body onload="htmlGenerateStyleList(style_list_webgl)">
   <font face="verdana">
   <h1>PyTorch fast-neural-style (FNS) in ONNX.js</h1>
   Backend:
@@ -16,11 +16,11 @@
       <option value='webgl'  selected='selected'>WebGL</option>
       <option value='cpu'>CPU</option>
   </select>
-
-  image size:
-  <select id="styleSelect" onchange="onSizeSelectChange()"></select>
+  &nbsp;&nbsp;
+  Model List:
+  <select id="styleSelect" onchange="onStyleSelectChange()"></select>
   
-  <input type="button" id="runInferButton" value="Fast Neural Style Benchmark" onclick="onRunFNSInfer()"/>
+  <input type="button" id="runInferButton" value="Fast Neural Style Benchmark" onclick="onRunFNSBenchmark()"/>
 
   <p>
   <p>

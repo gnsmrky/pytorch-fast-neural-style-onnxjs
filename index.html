@@ -1,15 +1,44 @@
 <html>
-<title>PyTorch fast-neural-style running in web browser</title>
+<head>
+  <script>
+    const onnxjs_version="v0.1.4"; // set this to the same version string as in npm url for onnx.min.js
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.4/dist/onnx.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.4/dist/onnx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
+  <script src="./utils.js"></script>
+</head>
+<body onload="htmlGenerateStyleList(style_list_webgl)">
+  <font face="verdana">
+  <h1>PyTorch fast-neural-style (FNS) in ONNX.js</h1>
+  Backend:
+  <select id="backendSelect" onchange="onBackendChange()">
+      <option value='webgl'  selected='selected'>WebGL</option>
+      <option value='cpu'>CPU</option>
+  </select>
+  &nbsp;
+  <input type="button" id="runInferButton" value="Fast Neural Style" onclick="onRunFNSInfer()"/>
 
-<body>
-PyTorch fast-neural-style running in web browser
-<br/>
-Still under development...
-<br/>
-Goto <a href="benchmark.html">PyTorch fast-neural-style benchmark with ONNX.js.</a>
+  <p>
+  <p>
+    <select id="styleSelect" onchange="onStyleSelectChange()"></select>
+    <div id="inferStyleDiv"></div>
+    
+    <select id="imageSelect" onchange="onStyleSelectChange()"></select>
+    <div id="contentImgDiv"></div>
 
+    <div id="outputImgDiv"></div>
+  </p>
+  <p>
+  <div id="inferResultsDiv" width="80%"></div>
+  </p>
+  
+  <div id="copyButtonDiv"></div>
+
+  <!-- zero width & height canvas to get gpu info -->
+  <canvas id="glcanvas" width="0" height="0"></canvas>
+</p>
+
+</font>
 </body>
 </html>
-

@@ -1,6 +1,4 @@
 
-//const srcImageBaseUrl    = "./images/amber_###x###.jpg";       // ### denotes the size of the image
-
 // model list
 // mosaic - webgl - nc8
 const style_mosaic_nc8_128x128 = {
@@ -120,9 +118,11 @@ var inferResultStr = "";
 const newLine = String.fromCharCode(13, 10);
 
 // html events
+/*
 window.onload = function() {
   htmlGenerateStyleList(style_list_webgl);
 }
+*/
 
 function htmlGenerateStyleList(list) {
   styleSelect.innerHTML = "";
@@ -136,7 +136,7 @@ function htmlGenerateStyleList(list) {
 
   //var styleIdx = document.getElementById("styleSelect").value;
   
-  htmlGenerateInferStyle(0);
+  htmlGenerateInferStyleBenchmark(0);
 }
 
 function getStyleList () {
@@ -157,10 +157,11 @@ function onBackendChange() {
   htmlGenerateStyleList(style_list);
 }
 
-function onSizeSelectChange() {
+function onStyleSelectChange() {
+  g_onnxSess = null;
+
   var styleIdx = document.getElementById("styleSelect").value;
-  
-  htmlGenerateInferStyle(styleIdx);
+  htmlGenerateInferStyleBenchmark(styleIdx);
 }
 
 function formatFloat (f) {
@@ -176,15 +177,52 @@ function asyncSetHtml (elemNode, html) {
   return p;
 }
 
-function onRunFNSInfer() {
+var g_onnxSess = null;
+
+async function onRunFNSInfer () {
   const styleIdx = document.getElementById("styleSelect").value;
   const style = getStyleList()[styleIdx];
 
-  //var onnxModelUrl = onnxModelBaseUrl.replace(/###/g,sizeStr);
   const onnxModelUrl = style.model_url;
   
   const backend = document.getElementById("backendSelect").value;
-  //onnxSess = new onnx.InferenceSession();
+  if (g_onnxSess == null) {
+    g_onnxSess = new onnx.InferenceSession({backendHint: backend});
+  }
+
+  inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
+  
+  inferResultStr = "loading onnx model..." + newLine;
+  asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+    g_onnxSess.loadModel(onnxModelUrl).then( ()=> {
+      srcTensor = canvasToTensor(srcCanvasId);
+
+      inferResultStr += "running fast neural style..." + newLine;
+      asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+        g_onnxSess.run([srcTensor]).then( (pred)=>{
+          const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
+                                                      //    only for the case of single output node. 
+          
+          // set output canvas
+          tensorToCanvas (output, dstCanvasId);
+          
+          inferResultStr += "done" + newLine;
+          asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+          });
+        });
+      });
+    });
+  });
+}
+
+// do FNS benchmark asynchronously
+function onRunFNSBenchmark() {
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
+
+  const onnxModelUrl = style.model_url;
+  
+  const backend = document.getElementById("backendSelect").value;
   onnxSess = new onnx.InferenceSession({backendHint: backend});
 
   // reset benchmark output
@@ -284,15 +322,19 @@ function onCopyToClipboard () {
 }
 
 // html utilities
-function htmlGenerateInferStyle(styleIdx) {
+function htmlGenerateInferStyle(styleIdx, contentImgIdx){
+
+}
+
+function htmlGenerateInferStyleBenchmark(styleIdx) {
   style = getStyleList()[styleIdx];
 
   // generate HTML
   var html = "";
 
-  html += "<canvas id='" + srcCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>";
-  html += "<img src='"   + style.thumb_url + "' height=" + style.height + " />";
-  html += "<canvas id='" + dstCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+  html += "<img src='"   + style.thumb_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<canvas id='" + srcCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>" + "&nbsp;";
+  html += "<canvas id='" + dstCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>" + "&nbsp;";
 
   inferStyleDiv.innerHTML = html;
 
