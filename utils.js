@@ -223,7 +223,8 @@ function tensorToCanvas (tensor, canvasId) {
 }
 
 function getStyleList () {
-  const backend = document.getElementById("backendSelect").value;
+  const backendElem = document.getElementById("backendSelect");
+  const backend = backendElem ? backendElem.value : 'webgl';
 
   if (backend == 'webgl') {
     return style_list_webgl;
@@ -363,7 +364,8 @@ async function onRunFNSInfer () {
 
   const onnxModelUrl = style.model_url;
   
-  const backend = document.getElementById("backendSelect").value;
+  //const backend = document.getElementById("backendSelect").value;
+  const backend = 'webgl';
 
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
 
