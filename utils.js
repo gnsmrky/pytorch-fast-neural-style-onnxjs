@@ -69,11 +69,15 @@ const style_list_cpu = [
 const content_url_list = [
   { name:"amber",     img_url:"./images/amber_256x256.jpg", credit_url: "unsplash.com" },
   { name:"boy",       img_url:"./images/boy.jpg", credit_url: "unsplash.com" },
-  { name:"boat",      img_url:"./images/boat.jpg", credit_url: "unsplash.com" },
+  { name:"car",       img_url:"./images/car.jpg", credit_url: "unsplash.com" },
   { name:"cat",       img_url:"./images/cat.jpg", credit_url: "unsplash.com" },
+  { name:"door",      img_url:"./images/door.jpg", credit_url: "unsplash.com" },
   { name:"flower",    img_url:"./images/flower.jpg", credit_url: "unsplash.com" },
+  { name:"flower2",   img_url:"./images/flower2.jpg", credit_url: "unsplash.com" },
   { name:"lake house",img_url:"./images/lake_house.jpg", credit_url: "unsplash.com" },
-  { name:"urban_sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
+  { name:"tree",      img_url:"./images/tree.jpg", credit_url: "unsplash.com" },
+  { name:"urban sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
+  { name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
 ];
 
 // html elements
