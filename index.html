@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
   <script src="./utils.js"></script>
 </head>
-<body onload="htmlGenerateStyleList(style_list_webgl)">
+<body onload="htmlGenerateUI()">
   <font face="verdana">
   <h1>PyTorch fast-neural-style (FNS) in ONNX.js</h1>
   Backend:
@@ -21,13 +21,21 @@
 
   <p>
   <p>
-    <select id="styleSelect" onchange="onStyleSelectChange()"></select>
-    <div id="inferStyleDiv"></div>
-    
-    <select id="imageSelect" onchange="onStyleSelectChange()"></select>
-    <div id="contentImgDiv"></div>
-
-    <div id="outputImgDiv"></div>
+    <table>
+        <tr>
+            <td>Style list:&nbsp;
+                <select id="styleSelect" onchange="onStyleSelectChange()"></select>
+                <div id="inferStyleDiv"></div>
+            </td>
+            <td>Image List:&nbsp;
+                <select id="contentImgSelect" onchange="onContentImgSelectChange()"></select>
+                <div id="contentImgDiv"></div>
+            </td>
+            <td>
+                 <div id="outputImgDiv"></div>
+            </td>
+        </tr>
+    </table>
   </p>
   <p>
   <div id="inferResultsDiv" width="80%"></div>
