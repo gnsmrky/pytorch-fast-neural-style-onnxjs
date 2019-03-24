@@ -77,7 +77,7 @@ const content_url_list = [
   { name:"lake house",img_url:"./images/lake_house.jpg", credit_url: "unsplash.com" },
   { name:"tree",      img_url:"./images/tree.jpg", credit_url: "unsplash.com" },
   { name:"urban sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
-  { name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
+  //{ name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
 ];
 
 // html elements
