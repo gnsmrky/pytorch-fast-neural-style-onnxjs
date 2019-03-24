@@ -170,6 +170,16 @@ function loadImage (imageUrl, canvasId, completeProc=null) {
   }
 }
 
+function isMobile() {
+  var uap = new UAParser();
+  uap.setUA(navigator.userAgent);
+
+  var uapRes = uap.getResult();
+  const osName = uapRes.os.name.toLowerCase();
+
+  return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+
 // canvas utilities
 function setCanvasRGB(canvasId, r, g, b, a=0xFF){
   var ctx = document.getElementById(canvasId).getContext("2d");
@@ -383,8 +393,6 @@ function htmlGenerateContent(contentIdx, callback) {
 function onContentImgSelectChange() {
   const contentIdx = document.getElementById("contentImgSelect").value;
   htmlGenerateContent(contentIdx, onRunFNSInfer);  // run style infer upon new content image is loaded
-
-  //onRunFNSInfer();
 }
 
 function htmlGenerateResult (){
@@ -406,8 +414,10 @@ async function onRunFNSInfer () {
 
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
 
-  // cache inference session so it can be re-used for newly selected content image
-  if (g_onnxSess == null) {
+  // when on desktop OS, cache inference session so it can be re-used for newly selected content image
+  // when on mobile OS, Android, do not cache inference session (an issue that inference output is incorrect when cached)
+  //      iOS is not yet supported by ONNX.js as of version 0.1.5.
+  if (g_onnxSess == null || isMobile()) {
     g_onnxSess = new onnx.InferenceSession({backendHint: backend});
     await g_onnxSess.loadModel(onnxModelUrl);
   }
