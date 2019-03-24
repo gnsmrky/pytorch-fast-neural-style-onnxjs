@@ -1,6 +1,8 @@
 
 
 // model list
+/*
+// 128x128 models
 // mosaic - webgl - nc8
 const style_mosaic_nc8_128x128 = {
   style_name: "mosaic 128x128 (nc8)",
@@ -26,13 +28,43 @@ const style_mosaic_nc16_128x128 = {
   thumb_url: "./images/mosaic.jpg",
   model_url: "./onnx_models/mosaic_nc16_128x128_onnxjs014.onnx"
 };
+*/
 
+// 256x256 nc16 webl models
+// candy
+const style_candy_nc16_256x256 = {
+  style_name: "candy 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/candy.jpg",
+  model_url: "./onnx_models/candy_nc16_256x256_onnxjs014.onnx"
+};
+
+// mosaic
 const style_mosaic_nc16_256x256 = {
   style_name: "mosaic 256x256 (nc16)",
   width: 256,
   height: 256,
   thumb_url: "./images/mosaic.jpg",
   model_url: "./onnx_models/mosaic_nc16_256x256_onnxjs014.onnx"
+};
+
+// rain-princess
+const style_rainprincess_nc16_256x256 = {
+  style_name: "rain princess 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/rain-princess.jpg",
+  model_url: "./onnx_models/rain-princess_nc16_256x256_onnxjs014.onnx"
+};
+
+// udnie
+const style_udnie_nc16_256x256 = {
+  style_name: "udnie 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/udnie.jpg",
+  model_url: "./onnx_models/udnie_nc16_256x256_onnxjs014.onnx"
 };
 
 
@@ -54,10 +86,13 @@ const style_mosaic_nc8_256x256_cpu = {
 };
 
 const style_list_webgl = [
-  style_mosaic_nc8_128x128,
-  style_mosaic_nc8_256x256,
-  style_mosaic_nc16_128x128,
-  style_mosaic_nc16_256x256
+  //style_mosaic_nc8_128x128,
+  //style_mosaic_nc8_256x256,
+  //style_mosaic_nc16_128x128,
+  style_mosaic_nc16_256x256,
+  style_candy_nc16_256x256,
+  style_rainprincess_nc16_256x256,
+  style_udnie_nc16_256x256
 ];
 
 const style_list_cpu = [
@@ -77,7 +112,7 @@ const content_url_list = [
   { name:"lake house",img_url:"./images/lake_house.jpg", credit_url: "unsplash.com" },
   { name:"tree",      img_url:"./images/tree.jpg", credit_url: "unsplash.com" },
   { name:"urban sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
-  //{ name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
+  { name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
 ];
 
 // html elements
@@ -288,7 +323,7 @@ function htmlGenerateStyle(styleIdx) {
 
   // generate HTML
   var html = "";
-  html += "<img src='" + style.thumb_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<img src='" + style.thumb_url + "' height='" + style.height + "px' />" + "&nbsp;";
 
   inferStyleDiv.innerHTML = html;
 }
@@ -333,7 +368,7 @@ function htmlGenerateContent(contentIdx, callback) {
   // generate content image HTML
   var html = "";
   //html += "<img src='"   + content.img_url + "' height=" + style.height + " />" + "&nbsp;";
-  html += "<canvas id='" + srcCanvasId + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+  html += "<canvas id='" + srcCanvasId + "' height='" + style.height + "px' width='" + style.width + "px' ></canvas>";
 
   contentImgDiv.innerHTML = html;
   loadImage (content.img_url, srcCanvasId, callback);
@@ -354,7 +389,7 @@ function htmlGenerateResult (){
   const styleIdx = document.getElementById("styleSelect").value;
   const style = getStyleList()[styleIdx];
 
-  html = "<canvas id='" + dstCanvasId + "' height=" + style.height + " width=" + style.width + " ></canvas>";
+  html = "<canvas id='" + dstCanvasId + "' height='" + style.height + "' width='" + style.width + "' ></canvas>";
   outputImgDiv.innerHTML = html;
 }
 
