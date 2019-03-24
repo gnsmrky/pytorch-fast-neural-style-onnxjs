@@ -1,7 +1,7 @@
 
 
 // model list
-/*
+
 // 128x128 models
 // mosaic - webgl - nc8
 const style_mosaic_nc8_128x128 = {
@@ -20,7 +20,6 @@ const style_mosaic_nc16_128x128 = {
   thumb_url: "./images/mosaic.jpg",
   model_url: "./onnx_models/mosaic_nc16_128x128_onnxjs014.onnx"
 };
-*/
 
 
 // 256x256 nc8 webl models
@@ -98,6 +97,23 @@ const style_list_webgl = [
 ];
 
 const style_list_cpu = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu
+];
+
+// benchmark style list
+const benchmark_style_list_webgl = [
+  style_mosaic_nc8_128x128,
+  style_mosaic_nc16_128x128,
+
+  style_mosaic_nc8_256x256,
+  style_mosaic_nc16_256x256,
+  style_candy_nc16_256x256,
+  style_rainprincess_nc16_256x256,
+  style_udnie_nc16_256x256
+];
+
+const benchmark_style_list_cpu = [
   style_mosaic_nc8_128x128_cpu,
   style_mosaic_nc8_256x256_cpu
 ];
@@ -279,6 +295,19 @@ function getStyleList () {
     return style_list_cpu;
   } else {
     return style_list_webgl;
+  }
+}
+
+function benchmark_getStyleList () {
+  const backendElem = document.getElementById("backendSelect");
+  const backend = backendElem ? backendElem.value : 'webgl';
+
+  if (backend == 'webgl') {
+    return benchmark_style_list_webgl;
+  } else if (backend == 'cpu') {
+    return benchmark_style_list_cpu;
+  } else {
+    return benchmark_style_list_webgl;
   }
 }
 
@@ -466,7 +495,7 @@ function htmlBench_GenerateStyleList(list) {
 }
 
 function htmlBench_GenerateInferStyle(styleIdx) {
-  style = getStyleList()[styleIdx];
+  style = benchmark_getStyleList()[styleIdx];
 
   // generate HTML
   var html = "";
@@ -489,7 +518,7 @@ function htmlBench_GenerateInferStyle(styleIdx) {
 
 function htmlBench_onBackendChange() {
   // re-generate style list
-  const style_list = getStyleList();
+  const style_list = benchmark_getStyleList();
   htmlBench_GenerateStyleList(style_list);
 }
 
@@ -503,7 +532,7 @@ function htmlBench_onStyleSelectChange() {
 // do FNS benchmark asynchronously
 function htmlBench_onRunFNSBenchmark() {
   const styleIdx = document.getElementById("styleBenchSelect").value;
-  const style = getStyleList()[styleIdx];
+  const style = benchmark_getStyleList()[styleIdx];
 
   const onnxModelUrl = style.model_url;
   
