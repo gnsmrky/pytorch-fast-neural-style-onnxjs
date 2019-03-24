@@ -12,14 +12,6 @@ const style_mosaic_nc8_128x128 = {
   model_url: "./onnx_models/mosaic_nc8_128x128_onnxjs014.onnx"
 };
 
-const style_mosaic_nc8_256x256 = {
-  style_name: "mosaic 256x256 (nc8)",
-  width: 256,
-  height: 256,
-  thumb_url: "./images/mosaic.jpg",
-  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
-};
-
 // mosaic - webgl - nc16
 const style_mosaic_nc16_128x128 = {
   style_name: "mosaic 128x128 (nc16)",
@@ -29,6 +21,16 @@ const style_mosaic_nc16_128x128 = {
   model_url: "./onnx_models/mosaic_nc16_128x128_onnxjs014.onnx"
 };
 */
+
+
+// 256x256 nc8 webl models
+const style_mosaic_nc8_256x256 = {
+  style_name: "mosaic 256x256 (nc8)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
+};
 
 // 256x256 nc16 webl models
 // candy
@@ -87,7 +89,7 @@ const style_mosaic_nc8_256x256_cpu = {
 
 const style_list_webgl = [
   //style_mosaic_nc8_128x128,
-  //style_mosaic_nc8_256x256,
+  style_mosaic_nc8_256x256,
   //style_mosaic_nc16_128x128,
   style_mosaic_nc16_256x256,
   style_candy_nc16_256x256,
