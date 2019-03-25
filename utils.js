@@ -226,11 +226,11 @@ function canvasToTensor (canvasId) {
   const h = ctx.canvas.height
   const w = ctx.canvas.width
   
+  const out_data   = new Float32Array(n*c*h*w);
+
   // load src context to a tensor
   var srcImgData = ctx.getImageData(0, 0, w, h);
   var src_data = srcImgData.data;
-  
-  const out_data   = new Float32Array(n*c*h*w);
   
   var src_idx = 0;
   var out_idx_r = 0;
@@ -684,7 +684,7 @@ function runFNSCount(){
     inferResultStr += "output.w:" + w + newLine;
     inferResultStr += "output.data length:" + t_data.length + newLine;
 
-    tensorToCanvas (output, dstCanvasId);
+    tensorToCanvas (inputTensor, dstCanvasId);
 
     inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
     inferResultsText.innerHTML += inferResultStr;
