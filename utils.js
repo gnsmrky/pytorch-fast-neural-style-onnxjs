@@ -672,18 +672,15 @@ function runFNSCount(){
   });
 
   p.then( async ()=>{
-
     // run inference synchronously
     input = canvasToTensor(srcCanvasId);
 
     const inferT0 = performance.now();
     
     try {
-      //await model.run([warmupTensor]);
       pred = await g_onnxSess.run([input]);
     } catch (e) {
         console.error(e);
-
         inferResultStr += "error: " + e + newLine;
     }
 
@@ -734,6 +731,7 @@ function runFNSCount(){
         runFNSCount();
       }, inferDisplayTime);
     }
+
     /*
     // run inference
     const inferT0 = performance.now();
