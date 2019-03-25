@@ -7,7 +7,7 @@
 ONNX.js <b>instance_norm</b> op test.
 
 <script>
-    const sess = new onnx.InferenceSession({backendHint: 'webgl'});
+    const sess = new onnx.InferenceSession({backendHint: 'cpu'});
 
     sess.loadModel("./onnx_models/insnorm_test_128x128.onnx").then(()=>{
     
