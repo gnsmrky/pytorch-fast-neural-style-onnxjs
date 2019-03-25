@@ -107,7 +107,7 @@ const style_mosaic_nc8_256x256_cpu = {
 };
 
 const style_list_webgl = [
-  style_mosaic_nc8_zeropad_128x128,
+  //style_mosaic_nc8_zeropad_128x128,
   style_mosaic_nc8_zeropad_256x256,
 
   style_mosaic_nc8_256x256,
@@ -166,7 +166,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 var g_onnxSess = null;
 const g_benchmark_contentImgUrl =  content_url_list[0].img_url;
 
-const totalInferCount  = 3;    // total number of inferences to run.
+const totalInferCount  = 10;    // total number of inferences to run.
 const inferDisplayTime = 50;  // in ms, time to show the inference output.
 const asyncTimeout     = 10;
 
@@ -301,9 +301,9 @@ function tensorToCanvas (tensor, canvasId) {
       g = t_data[t_idx_g++];
       b = t_data[t_idx_b++];
 
-      dst_ctx_data[dst_idx++]=r;// * 255.0; // 2d context on android chrome browser does not support float value.  Need to multiple by 255.0.
-      dst_ctx_data[dst_idx++]=g;// * 255.0;
-      dst_ctx_data[dst_idx++]=b;// * 255.0;
+      dst_ctx_data[dst_idx++]=r;
+      dst_ctx_data[dst_idx++]=g;
+      dst_ctx_data[dst_idx++]=b;
       dst_ctx_data[dst_idx++]=0xFF;
     }
   }
@@ -470,9 +470,7 @@ async function onRunFNSInfer () {
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
 
   // when on desktop OS, cache inference session so it can be re-used for newly selected content image
-  // when on mobile OS, Android, do not cache inference session (an issue that inference output is incorrect when cached)
-  //      iOS is not yet supported by ONNX.js as of version 0.1.5.
-  if (g_onnxSess == null || isMobile()) {
+  if (g_onnxSess == null) {
     g_onnxSess = new onnx.InferenceSession({backendHint: backend});
     await g_onnxSess.loadModel(onnxModelUrl);
   }
@@ -698,6 +696,7 @@ function runFNSCount(){
   });
 
   p.then( async ()=>{
+    /*
     // run inference synchronously
     input = canvasToTensor(srcCanvasId);
 
@@ -715,6 +714,7 @@ function runFNSCount(){
     const inferTimeStr = formatFloat(inferTime) + "ms";
 
     const output = pred.values().next().value;
+    */
 
     /*
     const h = output.dims[2];
@@ -724,7 +724,7 @@ function runFNSCount(){
     inferResultStr += "output.w:" + w + newLine;
     inferResultStr += "output.data length:" + t_data.length + newLine;
     */
-
+    /*
     var j = 0;
     inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
     inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
@@ -757,9 +757,11 @@ function runFNSCount(){
         runFNSCount();
       }, inferDisplayTime);
     }
+    */
 
-    /*
     // run inference
+    inputTensor = canvasToTensor(srcCanvasId);
+
     const inferT0 = performance.now();
     g_onnxSess.run([inputTensor]).then((pred)=>{
       const inferTime = performance.now() - inferT0;
@@ -790,6 +792,5 @@ function runFNSCount(){
         }
       });
     });
-    */
   });
 }
