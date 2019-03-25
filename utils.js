@@ -677,14 +677,25 @@ function runFNSCount(){
 
     const output = pred.values().next().value;
 
+    /*
     const h = output.dims[2];
     const w = output.dims[3];
     var t_data = output.data;
     inferResultStr += "output.h:" + h + newLine;
     inferResultStr += "output.w:" + w + newLine;
     inferResultStr += "output.data length:" + t_data.length + newLine;
+    */
 
-    tensorToCanvas (inputTensor, dstCanvasId);
+    var j = 0;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+
+    tensorToCanvas (output, dstCanvasId);
 
     inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
     inferResultsText.innerHTML += inferResultStr;
