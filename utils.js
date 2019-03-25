@@ -244,9 +244,13 @@ function canvasToTensor (canvasId) {
       src_b = src_data[src_idx++];
       src_idx++;
 
-      out_data[out_idx_r++] = src_r;
-      out_data[out_idx_g++] = src_g;
-      out_data[out_idx_b++] = src_b;
+      out_data[out_idx_r] = src_r;
+      out_data[out_idx_g] = src_g;
+      out_data[out_idx_b] = src_b;
+
+      out_data[out_idx_r++] /= 255.0;
+      out_data[out_idx_g++] /= 255.0;
+      out_data[out_idx_b++] /= 255.0;
     }
   }
 
@@ -275,9 +279,9 @@ function tensorToCanvas (tensor, canvasId) {
       g = t_data[t_idx_g++];
       b = t_data[t_idx_b++];
 
-      dst_ctx_data[dst_idx++]=r; // 2d context on android chrome browser does not support float value.  Need to multiple by 255.0.
-      dst_ctx_data[dst_idx++]=g;
-      dst_ctx_data[dst_idx++]=b;
+      dst_ctx_data[dst_idx++]=r;// * 255.0; // 2d context on android chrome browser does not support float value.  Need to multiple by 255.0.
+      dst_ctx_data[dst_idx++]=g;// * 255.0;
+      dst_ctx_data[dst_idx++]=b;// * 255.0;
       dst_ctx_data[dst_idx++]=0xFF;
     }
   }
