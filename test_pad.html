@@ -4,12 +4,12 @@
 <script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.4/dist/onnx.min.js"></script>
 
 <body>
-ONNX.js <b>reflection pad zero</b> op test.
+ONNX.js <b>reflection pad</b> op test.
 
 <script>
     const sess = new onnx.InferenceSession({backendHint: 'webgl'});
 
-    sess.loadModel("./onnx_models/test_pad_zero_128x128.onnx").then(()=>{
+    sess.loadModel("./onnx_models/test_pad_reflect_128x128.onnx").then(()=>{
     
         const n = 3;
         const h = 128;
