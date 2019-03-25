@@ -275,7 +275,7 @@ function tensorToCanvas (tensor, canvasId) {
       g = t_data[t_idx_g++];
       b = t_data[t_idx_b++];
 
-      dst_ctx_data[dst_idx++]=r;
+      dst_ctx_data[dst_idx++]=r; // 2d context on android chrome browser does not support float value.  Need to multiple by 255.0.
       dst_ctx_data[dst_idx++]=g;
       dst_ctx_data[dst_idx++]=b;
       dst_ctx_data[dst_idx++]=0xFF;
@@ -668,10 +668,10 @@ function runFNSCount(){
   p.then( async ()=>{
 
     // run inference synchronously
-    inputTensor = canvasToTensor(srcCanvasId);
+    input = canvasToTensor(srcCanvasId);
 
     const inferT0 = performance.now();
-    pred = await g_onnxSess.run([inputTensor]);
+    pred = await g_onnxSess.run([input]);
     const inferTime = performance.now() - inferT0;
     const inferTimeStr = formatFloat(inferTime) + "ms";
 
@@ -686,6 +686,15 @@ function runFNSCount(){
     inferResultStr += "output.data length:" + t_data.length + newLine;
     */
 
+    var j = 0;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    
     var j = 0;
     inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
     inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
