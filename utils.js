@@ -475,7 +475,12 @@ async function onRunFNSInfer () {
   });
 }
 
+
+
+//-------------------------------------------------------------------------------------------------
 // benchmark html
+//-------------------------------------------------------------------------------------------------
+
 //
 // html functions
 //
@@ -489,8 +494,6 @@ function htmlBench_GenerateStyleList(list) {
     }
   }
 
-  //var styleIdx = document.getElementById("styleBenchSelect").value;
-  
   htmlBench_GenerateInferStyle(0);
 }
 
@@ -662,9 +665,32 @@ function runFNSCount(){
     setTimeout (resolve, 10);
   });
 
-  p.then( ()=>{
+  p.then( async ()=>{
     inputTensor = canvasToTensor(srcCanvasId);
 
+    const inferT0 = performance.now();
+    pred = await g_onnxSess.run([inputTensor]);
+    const inferTime = performance.now() - inferT0;
+    const inferTimeStr = formatFloat(inferTime) + "ms";
+
+    const output = pred.values().next().value;
+    
+    tensorToCanvas (output, dstCanvasId);
+
+    
+    inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
+    inferResultsText.innerHTML += inferResultStr;
+    
+    inferCountDown--;
+    if (inferCountDown == 0){
+      FNSRunCompleteCallback();
+    } else {
+      // give the output canvas some time (inferDisplayTime) to display
+      setTimeout( ()=>{
+        runFNSCount();
+      }, inferDisplayTime);
+    }
+    /*
     // run inference
     const inferT0 = performance.now();
     g_onnxSess.run([inputTensor]).then((pred)=>{
@@ -696,5 +722,6 @@ function runFNSCount(){
         }
       });
     });
+    */
   });
 }
