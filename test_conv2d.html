@@ -9,7 +9,7 @@ ONNX.js <b>instance_norm</b> op test.
 <script>
     const sess = new onnx.InferenceSession({backendHint: 'webgl'});
 
-    sess.loadModel("./onnx_models/test_conv2d_pad_128x128.onnx").then(()=>{
+    sess.loadModel("./onnx_models/test_pad_128x128.onnx").then(()=>{
     
         const n = 3;
         const x = new Float32Array(1*n*128*128);
@@ -27,7 +27,7 @@ ONNX.js <b>instance_norm</b> op test.
             console.log(`model output tensor size: ${outputT.size}`);
             
             const newLine = "<br/>";//String.fromCharCode(13, 10);
-            logOutput.innerHTML = "test 16" + newLine;
+            logOutput.innerHTML = "test 17" + newLine;
 
             var i=0;
             logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
