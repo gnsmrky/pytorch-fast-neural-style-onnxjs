@@ -302,6 +302,9 @@ function benchmark_getStyleList () {
   const backendElem = document.getElementById("backendSelect");
   const backend = backendElem ? backendElem.value : 'webgl';
 
+  // android debug
+  return benchmark_style_list_cpu;
+  
   if (backend == 'webgl') {
     return benchmark_style_list_webgl;
   } else if (backend == 'cpu') {
