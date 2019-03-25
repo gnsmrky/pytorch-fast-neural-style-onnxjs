@@ -3,6 +3,16 @@
 // model list
 
 // 128x128 models
+
+// candy - webgl - nc8
+const style_mosaic_nc8_zeropad_128x128 = {
+  style_name: "mosaic zero-pad 128x128 (nc8)",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_zeropad_128x128.onnx"
+};
+
 // mosaic - webgl - nc8
 const style_mosaic_nc8_128x128 = {
   style_name: "mosaic 128x128 (nc8)",
@@ -23,6 +33,16 @@ const style_mosaic_nc16_128x128 = {
 
 
 // 256x256 nc8 webl models
+
+// candy - webgl - nc8
+const style_mosaic_nc8_zeropad_256x256 = {
+  style_name: "mosaic zero-pad 256x256 (nc8)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_zeropad_256x256.onnx"
+};
+
 const style_mosaic_nc8_256x256 = {
   style_name: "mosaic 256x256 (nc8)",
   width: 256,
@@ -87,7 +107,9 @@ const style_mosaic_nc8_256x256_cpu = {
 };
 
 const style_list_webgl = [
-  //style_mosaic_nc8_128x128,
+  style_mosaic_nc8_zeropad_128x128,
+  style_mosaic_nc8_zeropad_256x256,
+
   style_mosaic_nc8_256x256,
   //style_mosaic_nc16_128x128,
   style_mosaic_nc16_256x256,
@@ -103,6 +125,9 @@ const style_list_cpu = [
 
 // benchmark style list
 const benchmark_style_list_webgl = [
+  style_mosaic_nc8_zeropad_128x128,
+  style_mosaic_nc8_zeropad_256x256,
+
   style_mosaic_nc8_128x128,
   style_mosaic_nc16_128x128,
 
