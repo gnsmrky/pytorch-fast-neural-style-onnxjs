@@ -141,7 +141,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 var g_onnxSess = null;
 const g_benchmark_contentImgUrl =  content_url_list[0].img_url;
 
-const totalInferCount  = 10;    // total number of inferences to run.
+const totalInferCount  = 3;    // total number of inferences to run.
 const inferDisplayTime = 50;  // in ms, time to show the inference output.
 const asyncTimeout     = 10;
 
@@ -619,16 +619,22 @@ function htmlBench_onRunFNSBenchmark() {
       warmTensor = canvasToTensor(srcCanvasId);
   
       const warmT0 = performance.now();
-      g_onnxSess.run([warmTensor]).then( (output)=> {
-        const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
-  
-        inferResultStr += "warm up time: " + warmTStr + newLine;
-        inferResultStr += newLine;
 
-        asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
-          runFNSCount();
+      try {
+        g_onnxSess.run([warmTensor]).then( (output)=> {
+          const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
+    
+          inferResultStr += "warm up time: " + warmTStr + newLine;
+          inferResultStr += newLine;
+
+          asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+            runFNSCount();
+          });
         });
-      });
+      } catch (e) {
+        inferResultStr += "warmup error: " + e + newLine;
+        inferResultsText.innerHTML += inferResultStr;
+      }
     });
   });
 }
@@ -671,7 +677,17 @@ function runFNSCount(){
     input = canvasToTensor(srcCanvasId);
 
     const inferT0 = performance.now();
-    pred = await g_onnxSess.run([input]);
+    
+    try {
+      //await model.run([warmupTensor]);
+      pred = await g_onnxSess.run([input]);
+    } catch (e) {
+        console.error(e);
+
+        inferResultStr += "error: " + e + newLine;
+    }
+
+
     const inferTime = performance.now() - inferT0;
     const inferTimeStr = formatFloat(inferTime) + "ms";
 
