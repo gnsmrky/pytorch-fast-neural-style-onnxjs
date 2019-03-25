@@ -7,7 +7,7 @@
 ONNX.js <b>instance_norm</b> op test.
 
 <script>
-    const sess = new onnx.InferenceSession({backendHint: 'cpu'});
+    const sess = new onnx.InferenceSession({backendHint: 'webgl'});
 
     sess.loadModel("./onnx_models/insnorm_test_128x128.onnx").then(()=>{
     
@@ -30,9 +30,24 @@ ONNX.js <b>instance_norm</b> op test.
         console.log('data:' + outputT.data[3]);
         console.log('data:' + outputT.data[4]);
         console.log('data:' + outputT.data[5]);
+        
+        const newLine = "<br/>";//String.fromCharCode(13, 10);
+        var i=0;
+        logOutput.innerHTML = "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+        logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
+
         });
     });
 </script>
+
+<div id='logOutput'></div>
 
 </body>
 </html>
