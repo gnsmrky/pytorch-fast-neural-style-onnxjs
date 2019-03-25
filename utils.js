@@ -237,8 +237,7 @@ function canvasToTensor (canvasId) {
   var out_idx_g = out_idx_r + h*w;
   var out_idx_b = out_idx_g + h*w;
 
-  const norm = 256.0;
-
+  const norm = 1.0;
   for (var y=0; y<h; y++) {
     for (var x=0; x<w; x++) {
       src_r = src_data[src_idx++];

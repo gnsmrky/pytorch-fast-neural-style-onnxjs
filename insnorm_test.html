@@ -11,11 +11,11 @@ ONNX.js <b>instance_norm</b> op test.
 
     sess.loadModel("./onnx_models/insnorm_test_128x128.onnx").then(()=>{
     
-    const n = 4;
+    const n = 3;
     const x = new Float32Array(1*n*128*128);
 
     for (i=0; i<1*n*128*128; i++) {
-        x[i] = (i%256) / 255.0;
+        x[i] = (i%256) / 1.0;
     }
 
     const inputT = new onnx.Tensor(x, 'float32', [1,n,128,128]);
