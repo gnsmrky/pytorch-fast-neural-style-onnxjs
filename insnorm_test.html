@@ -32,6 +32,8 @@ ONNX.js <b>instance_norm</b> op test.
         console.log('data:' + outputT.data[5]);
         
         const newLine = "<br/>";//String.fromCharCode(13, 10);
+        logOutput.innerHTML = "test " + newLine;
+
         var i=0;
         logOutput.innerHTML = "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
         logOutput.innerHTML += "data[" + i + "]: " + outputT.data[i] + newLine;  i++;
