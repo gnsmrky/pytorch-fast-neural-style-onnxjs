@@ -15,17 +15,18 @@
 
 <table>
     <tr>
-        <td align='right'>Backend:</td>
+        <td align='right'>Backend:<br/>&nbsp;</td>
         <td>
             <select id="backendSelectElem" onchange="htmlOnBackendSelectChange()">
                 <option value='webgl'  selected='selected'>WebGL</option>
                 <option value='cpu'>CPU</option>
                 <option value='cpu'>Web Assembly</option>
             </select>
+            <br/>&nbsp;
         </td>
     </tr>
     <tr>
-        <td align='right'>ONNX Op model list:</td>
+        <td align='right'>ONNX Op model:</td>
         <td>
             <select id="opModelSelectElem" onchange="htmlOnOpModelSelectChange()"></select>
         </td>
@@ -114,7 +115,7 @@ function htmlOnRunOpTest() {
     
     inferResultStr  = "ONNX.js Op Test" + cNewLine;
     inferResultStr += "======================================================================" + cNewLine;
-    inferResultStr += "ONNX.js version:" + cOnnxjsVersion + cNewLine;
+    inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine;
     inferResultStr += cNewLine;
     inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
     inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
@@ -195,7 +196,8 @@ function runOpTest (outputElem) {
             for (var i=0; i<cNumValues; i++) {
                 outputElem.innerHTML += "output.data[" + i + "]: " + outputT.data[i] + cNewLine;
             }
-            outputElem.innerHTML += cNewLine;
+            outputElem.innerHTML += "... ... ..." + cNewLine;
+            //outputElem.innerHTML += cNewLine;
 
             // display few floats in the middle of the image
             const cSkip = h*w/2;
@@ -203,6 +205,7 @@ function runOpTest (outputElem) {
                 const i = j + cSkip;
                 outputElem.innerHTML += "outout.data[" + i + "]: " + outputT.data[i] + cNewLine;
             }
+            outputElem.innerHTML += "... ... ..." + cNewLine;
             outputElem.innerHTML += cNewLine;
         }).catch ((e) => {
             outputElem.innerHTML += "!!!inference error!!! " + cNewLine + e + cNewLine;
