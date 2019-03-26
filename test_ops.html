@@ -1,0 +1,170 @@
+<html>
+<title>PyTorch fast-neural-style running in web browser</title>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.5/dist/onnx.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
+
+<body onload="htmlGenerateUI()">
+<font face="verdana">
+<h1>ONNX.js op test</h1>
+
+Backend:
+<select id="backendSelectElem" onchange="htmlOnBackendSelectChange()">
+    <option value='webgl'  selected='selected'>WebGL</option>
+    <option value='cpu'>CPU</option>
+    <option value='cpu'>Web Assembly</option>
+</select>
+&nbsp;&nbsp;
+<select id="opModelSelectElem" onchange="htmlOnOpModelSelectChange()"></select>
+&nbsp;&nbsp;
+Op list:
+<input type="button" id="testButtonElem" value="Run Op Test" onclick="htmlOnRunOpTest()"/>
+
+<p>
+<div id='logOutputElem'></div>
+</p>
+</font>
+
+<script>
+const cBackendSelectId = "backendSelectElem";
+const cOpModelSelectId = "opModelSelectElem";
+
+const cModelList = [
+    { name: "Conv2d"                        , model_url: "./onnx_test/test_conv2d_128x128.onnx" },
+    { name: "Pad 'Reflection' mode"         , model_url: "./onnx_test/test_pad_reflect_128x128.onnx" },
+    { name: "Pad 'Reflection' mode + Conv2D", model_url: "./onnx_test/test_pad_reflect_conv2d_128x128.onnx" },
+    { name: "Pad 'Zero' mode"               , model_url: "./onnx_test/test_pad_zero_128x128.onnx" },
+];
+
+function asyncSetHtml (elemNode, html) {
+  var p = new Promise( (resolve, reject) => {
+    elemNode.innerHTML = html;
+    setTimeout (resolve, 0);
+  });
+
+  return p;
+}
+
+function htmlGenerateUI () {
+    htmlGenerateModelList(opModelSelectElem);
+}
+
+function htmlGenerateModelList (listElem) {
+    listElem.innerHTML = "";
+    const list = cModelList;
+    for (i=0; i<list.length; i++) {
+        if (i==0) {
+            listElem.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].name + "</option>";
+        } else {
+            listElem.innerHTML += "<option value='" + i + "'>" + list[i].name + "</option>";
+        }
+    }
+}
+
+function htmlOnBackendSelectChange() {
+
+}
+
+function htmlOnOpModelSelectChange() {
+
+}
+
+function htmlOnRunOpTest() {
+    // log browser info
+    var uap = new UAParser();
+    uap.setUA(navigator.userAgent);
+    var uapRes = uap.getResult();
+    
+    newLine = "<br/>";
+    
+    inferResultStr = newLine;
+    inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + newLine;
+    inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + newLine;
+    inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + newLine;
+
+    inferResultStr += newLine;
+
+    // log cpu arch info
+    inferResultStr += "cpu arch: " + uapRes.cpu.architecture + newLine;
+
+    // log gpu info
+    var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
+    if (glCtx == null) {
+        inferResultStr += "cannot get 'webgl' context..." + newLine;
+    } else {
+        var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
+        if (glInfo != null) {
+        inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + newLine;
+        } else {
+        inferResultStr += "gpu: unknown" + newLine;
+        }
+    }
+    inferResultStr += newLine;
+
+    // log backend info
+    backend = backendSelectElem.value;
+    inferResultStr += "ONNX.js backend: " + backend + newLine + newLine;
+
+    // load & run inference
+    asyncSetHtml (logOutputElem, inferResultStr).then (runOpTest(logOutputElem));
+}
+
+function runOpTest (outputElem) {
+    
+    const backend = document.getElementById(cBackendSelectId).value;
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    
+    const sess = new onnx.InferenceSession({backendHint: backend});
+
+    const modelUrl = cModelList[opModelIdx].model_url;
+    
+    const newLine = "<br/>";
+
+    sess.loadModel(modelUrl).then(()=>{
+        const n = 3;
+        const h = 128;
+        const w = 128;
+
+        const x = new Float32Array(1*n*h*w);
+
+        for (i=0; i<1*n*h*w; i++) {
+            x[i] = (i%256) / 255.0;
+        }
+
+        const inputT = new onnx.Tensor(x, 'float32', [1,n,h,w]);
+
+        sess.run([inputT]).then(output=>{
+            const outputT = output.values().next().value;
+
+            outputElem.innerHTML += "model output tensor size:" + outputT.size + newLine + newLine;
+            
+            // display first few floats
+            var i;
+            const cNumValues = 16
+            for (var i=0; i<cNumValues; i++) {
+                outputElem.innerHTML += "output.data[" + i + "]: " + outputT.data[i] + newLine;
+            }
+            outputElem.innerHTML += newLine;
+
+            // display few floats in the middle of the image
+            const cSkip = h*w/2;
+            for (var j=0; j<cNumValues; j++) {
+                const i = j + cSkip;
+                outputElem.innerHTML += "outout.data[" + i + "]: " + outputT.data[i] + newLine;
+            }
+            outputElem.innerHTML += newLine;
+        }).catch ((e) => {
+            outputElem.innerHTML += "<font color='red'>" + "inference error: " + e + "</font>" + newLine;
+        });
+    }).catch((e)=> {
+        outputElem.innerHTML += "<font color='red'>" + "load error: " + e + "</font>" + newLine;
+    });
+
+}
+</script>
+
+  <!-- zero width & height canvas to get gpu info -->
+  <canvas id="glcanvas" width="0" height="0"></canvas>
+</body>
+</html>
+
