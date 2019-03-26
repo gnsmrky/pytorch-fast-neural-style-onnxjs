@@ -1,6 +1,11 @@
 <html>
+    
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PyTorch fast-neural-style running in web browser</title>
 
+<script>
+        const cOnnxjsVersion="v0.1.5"; // set this to the same version string as in npm url for onnx.min.js
+</script>
 <script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.5/dist/onnx.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
 
@@ -8,21 +13,39 @@
 <font face="verdana">
 <h1>ONNX.js op test</h1>
 
-Backend:
-<select id="backendSelectElem" onchange="htmlOnBackendSelectChange()">
-    <option value='webgl'  selected='selected'>WebGL</option>
-    <option value='cpu'>CPU</option>
-    <option value='cpu'>Web Assembly</option>
-</select>
-&nbsp;&nbsp;
-Op list:
-<select id="opModelSelectElem" onchange="htmlOnOpModelSelectChange()"></select>
-&nbsp;&nbsp;
+<table>
+    <tr>
+        <td align='right'>Backend:</td>
+        <td>
+            <select id="backendSelectElem" onchange="htmlOnBackendSelectChange()">
+                <option value='webgl'  selected='selected'>WebGL</option>
+                <option value='cpu'>CPU</option>
+                <option value='cpu'>Web Assembly</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td align='right'>ONNX Op model list:</td>
+        <td>
+            <select id="opModelSelectElem" onchange="htmlOnOpModelSelectChange()"></select>
+        </td>
+    </tr>
+    <tr>
+        <td align='right' valign='top'>ONNX Graph:</td>
+        <td><img id='onnxGraphElem' width='100px' src=''/></td>
+    </tr>
+</table>
+
+<br/>
+
 <input type="button" id="testButtonElem" value="Run Op Test" onclick="htmlOnRunOpTest()"/>
 
 <p>
-<div id='logOutputElem'></div>
+<div id='logOutputDiv'></div>
 </p>
+
+<div id="copyButtonDiv"></div>
+
 </font>
 
 <script>
@@ -35,6 +58,9 @@ const cModelList = [
     { name: "Pad 'Reflection' mode + Conv2D", model_url: "./onnx_test/test_pad_reflect_conv2d_128x128.onnx" },
     { name: "Pad 'Zero' mode"               , model_url: "./onnx_test/test_pad_zero_128x128.onnx" },
 ];
+
+
+const cNewLine = String.fromCharCode(13, 10);
 
 function asyncSetHtml (elemNode, html) {
   var p = new Promise( (resolve, reject) => {
@@ -59,14 +85,25 @@ function htmlGenerateModelList (listElem) {
             listElem.innerHTML += "<option value='" + i + "'>" + list[i].name + "</option>";
         }
     }
+
+    onnxGraphElem.src = list[0].model_url + ".png";
 }
 
 function htmlOnBackendSelectChange() {
-
+    
 }
 
 function htmlOnOpModelSelectChange() {
+    const modelIdx = opModelSelectElem.value;
+    
+    const list = cModelList;
+    onnxGraphElem.src = list[modelIdx].model_url + ".png";
+}
 
+function htmlOnCopyToClipboard (textAreaElem) {
+    //outputElem = document.getElementById(textAreaId);
+    textAreaElem.select();
+    document.execCommand("copy");
 }
 
 function htmlOnRunOpTest() {
@@ -75,37 +112,51 @@ function htmlOnRunOpTest() {
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
-    newLine = "<br/>";
-    
-    inferResultStr = newLine;
-    inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + newLine;
-    inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + newLine;
-    inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + newLine;
+    inferResultStr  = "ONNX.js Op Test" + cNewLine;
+    inferResultStr += "======================================================================" + cNewLine;
+    inferResultStr += "ONNX.js version:" + cOnnxjsVersion + cNewLine;
+    inferResultStr += cNewLine;
+    inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
+    inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
+    inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + cNewLine;
 
-    inferResultStr += newLine;
+    inferResultStr += cNewLine;
 
     // log cpu arch info
-    inferResultStr += "cpu arch: " + uapRes.cpu.architecture + newLine;
+    inferResultStr += "cpu arch: " + uapRes.cpu.architecture + cNewLine;
 
     // log gpu info
     var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
     if (glCtx == null) {
-        inferResultStr += "cannot get 'webgl' context..." + newLine;
+        inferResultStr += "cannot get 'webgl' context..." + cNewLine;
     } else {
         var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
         if (glInfo != null) {
-        inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + newLine;
+        inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + cNewLine;
         } else {
-        inferResultStr += "gpu: unknown" + newLine;
+        inferResultStr += "gpu: unknown" + cNewLine;
         }
     }
-    inferResultStr += newLine;
+    inferResultStr += cNewLine;
 
     // log backend info
     backend = backendSelectElem.value;
-    inferResultStr += "ONNX.js backend: " + backend + newLine + newLine;
+    inferResultStr += "ONNX.js backend: " + backend + cNewLine;
+    
+    // log onnx model file
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    const modelUrl = cModelList[opModelIdx].model_url;
+    inferResultStr += "ONNX model file: " + modelUrl + cNewLine + cNewLine;
+
+    // create text area
+    const logOutputElemId = "resultLogElem";
+    logOutputDiv.innerHTML = "<textarea id='" + logOutputElemId + "' readonly cols=90 rows=30></textarea>";
+
+    // add copy button
+    copyButtonDiv.innerHTML = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
 
     // load & run inference
+    logOutputElem = document.getElementById(logOutputElemId);
     asyncSetHtml (logOutputElem, inferResultStr).then (runOpTest(logOutputElem));
 }
 
@@ -117,8 +168,6 @@ function runOpTest (outputElem) {
     const sess = new onnx.InferenceSession({backendHint: backend});
 
     const modelUrl = cModelList[opModelIdx].model_url;
-    
-    const newLine = "<br/>";
 
     sess.loadModel(modelUrl).then(()=>{
         const n = 3;
@@ -132,32 +181,34 @@ function runOpTest (outputElem) {
         }
 
         const inputT = new onnx.Tensor(x, 'float32', [1,n,h,w]);
-
+        
+        outputElem.innerHTML += "output:" + cNewLine;
+        outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
         sess.run([inputT]).then(output=>{
             const outputT = output.values().next().value;
 
-            outputElem.innerHTML += "model output tensor size:" + outputT.size + newLine + newLine;
+            outputElem.innerHTML += "model output tensor size:" + outputT.size + cNewLine + cNewLine;
             
             // display first few floats
             var i;
             const cNumValues = 16
             for (var i=0; i<cNumValues; i++) {
-                outputElem.innerHTML += "output.data[" + i + "]: " + outputT.data[i] + newLine;
+                outputElem.innerHTML += "output.data[" + i + "]: " + outputT.data[i] + cNewLine;
             }
-            outputElem.innerHTML += newLine;
+            outputElem.innerHTML += cNewLine;
 
             // display few floats in the middle of the image
             const cSkip = h*w/2;
             for (var j=0; j<cNumValues; j++) {
                 const i = j + cSkip;
-                outputElem.innerHTML += "outout.data[" + i + "]: " + outputT.data[i] + newLine;
+                outputElem.innerHTML += "outout.data[" + i + "]: " + outputT.data[i] + cNewLine;
             }
-            outputElem.innerHTML += newLine;
+            outputElem.innerHTML += cNewLine;
         }).catch ((e) => {
-            outputElem.innerHTML += "<font color='red'>" + "inference error: " + e + "</font>" + newLine;
+            outputElem.innerHTML += "!!!inference error!!! " + cNewLine + e + cNewLine;
         });
     }).catch((e)=> {
-        outputElem.innerHTML += "<font color='red'>" + "load error: " + e + "</font>" + newLine;
+        outputElem.innerHTML += "!!!load error!!! " + cNewLine + e + cNewLine;
     });
 
 }
