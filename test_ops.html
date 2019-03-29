@@ -136,24 +136,26 @@ function htmlOnCopyToClipboard (textAreaElem) {
 }
 
 function htmlOnRunOpTest() {
+    inferResultStr = "";
+
     // log browser info
     var uap = new UAParser();
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
-
+    
+    // detect device model
     const device = uap.getDevice();
     if (device.model) {
-        inferResultStr += "device model: " + device.model + cNewLine;
-        inferResultStr += "device type: " + device.type + cNewLine;
         inferResultStr += "device vendor: " + device.vendor + cNewLine;
+        inferResultStr += "device type: " + device.type + cNewLine;
+        inferResultStr += "device model: " + device.model + cNewLine;
     } else {
         // user input for models
         inferResultStr  = "System Model: [manual input]" + cNewLine;
         inferResultStr += cNewLine;
     }
-
 
     // log output
     inferResultStr += "ONNX.js Op Test - " + cModelList[opModelIdx].name + cNewLine;
