@@ -69,6 +69,16 @@ const cModelList = [
 
 const cNewLine = String.fromCharCode(13, 10);
 
+function isMobile() {
+  var uap = new UAParser();
+  uap.setUA(navigator.userAgent);
+
+  var uapRes = uap.getResult();
+  const osName = uapRes.os.name.toLowerCase();
+
+  return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+
 function asyncSetHtml (elemNode, html) {
   var p = new Promise( (resolve, reject) => {
     elemNode.innerHTML = html;
@@ -119,8 +129,12 @@ function htmlOnRunOpTest() {
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
+    // user input for models
+    inferResultStr  = "System Model: [manual input]" + cNewLine;
+    inferResultStr += cNewLine;
+
     // log output
-    inferResultStr  = "ONNX.js Op Test" + cNewLine;
+    inferResultStr += "ONNX.js Op Test" + cNewLine;
     inferResultStr += "======================================================================" + cNewLine;
     inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
 
@@ -165,7 +179,16 @@ function htmlOnRunOpTest() {
     logOutputDiv.innerHTML = "<textarea id='" + logOutputElemId + "' readonly cols=90 rows=30></textarea>";
 
     // add copy button
-    copyButtonDiv.innerHTML = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
+    copyButtonDiv.innerHTML  = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
+    copyButtonDiv.innerHTML += "&nbsp;&nbsp;&nbsp;";
+
+    // add post link
+    issueIdx = isMobile() ? 2 : 1;
+    issueTypeStr = issueIdx ? "desktop" : "mobile";
+    copyButtonDiv.innerHTML += "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
+
+    // add link to issue #1, where users can post the result.
+
     
     // load & run inference
     inferResultStr += "```" + cNewLine;
