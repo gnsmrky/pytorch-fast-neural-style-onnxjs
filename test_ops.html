@@ -45,7 +45,13 @@
 <div id='logOutputDiv'></div>
 </p>
 
+<p>
 <div id="copyButtonDiv"></div>
+</p>
+
+<p>
+<div id="logAllOutputDiv"></div>
+</p>
 
 </font>
 
@@ -113,9 +119,20 @@ function htmlOnRunOpTest() {
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
-    inferResultStr  = "ONNX.js Op Test" + cNewLine;
+    inferResultStr  = "```" + cNewLine;
+    inferResultStr += "ONNX.js Op Test" + cNewLine;
     inferResultStr += "======================================================================" + cNewLine;
-    inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine;
+    inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
+    
+    // log backend info
+    backend = backendSelectElem.value;
+    inferResultStr += "backend: " + backend + cNewLine;
+    
+    // log onnx model file
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    const modelUrl = cModelList[opModelIdx].model_url;
+    inferResultStr += "model file: " + modelUrl + cNewLine;
+
     inferResultStr += cNewLine;
     inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
     inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
@@ -140,28 +157,80 @@ function htmlOnRunOpTest() {
     }
     inferResultStr += cNewLine;
 
-    // log backend info
-    backend = backendSelectElem.value;
-    inferResultStr += "ONNX.js backend: " + backend + cNewLine;
-    
-    // log onnx model file
-    const opModelIdx = document.getElementById(cOpModelSelectId).value;
-    const modelUrl = cModelList[opModelIdx].model_url;
-    inferResultStr += "ONNX model file: " + modelUrl + cNewLine + cNewLine;
+    // onnx graph file
+    inferResultStr += "[onnx graph](" + onnxGraphElem.src + ")" + cNewLine + cNewLine;
 
-    // create text area
+    // create partial output text area
     const logOutputElemId = "resultLogElem";
     logOutputDiv.innerHTML = "<textarea id='" + logOutputElemId + "' readonly cols=90 rows=30></textarea>";
 
     // add copy button
     copyButtonDiv.innerHTML = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
+    
+    // create all output text area
+    //const logAllOutputElemId = "allResultLogElem";
+    //logAllOutputDiv.innerHTML = "<textarea id='" + logAllOutputElemId + "' readonly cols=90 rows=30></textarea>";
 
     // load & run inference
-    logOutputElem = document.getElementById(logOutputElemId);
-    asyncSetHtml (logOutputElem, inferResultStr).then (runOpTest(logOutputElem));
+    outputElem    = document.getElementById(logOutputElemId);
+    asyncSetHtml (outputElem, inferResultStr).then( ()=> {
+            runOpTest((output)=> {
+                outputElem.innerHTML += "output:" + cNewLine;
+                outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
+
+                const outputT = output.values().next().value;
+                outputElem.innerHTML += "output tensor dimension:" + outputT.dims + cNewLine;
+                outputElem.innerHTML += "output tensor size:" + outputT.size + cNewLine + cNewLine;
+                
+                outputElem.innerHTML += makeOutputHtml(outputT, true);
+
+                outputElem.innerHTML += "```";
+
+            }, (errorHtml)=>{
+                outputElem.innerHTML += errorHtml;
+            });
+        });
+    
 }
 
-function runOpTest (outputElem) {
+function makeOutputHtml (outputT, isPartialOutput) {
+    // display first few floats
+    var i;
+    const cNumValues = 16
+
+    outputHtml = "";
+    if (isPartialOutput) { // partial output
+        outputHtml += "row 0:" + cNewLine;
+        for (var i=0; i<cNumValues; i++) {
+            outputHtml += "output.data[0, " + i + "]: " + outputT.data[i] + cNewLine;
+        }
+        outputHtml += "... ... ..." + cNewLine + cNewLine;
+
+        // display few floats in the middle of the image
+        const rowIdx = outputT.dims[2] / 2;
+        outputHtml += "row " + rowIdx + ":" + cNewLine;
+        const cSkip = rowIdx * outputT.dims[3];
+        for (var j=0; j<cNumValues; j++) {
+            const i = j + cSkip;
+            outputHtml += "output.data[" + rowIdx + "," + j + "]: " + outputT.data[i] + cNewLine;
+        }
+        outputHtml += "... ... ..." + cNewLine;
+        outputHtml += cNewLine;
+    } else { // full output
+        alloutputHtml += "model output tensor size:" + outputT.size + cNewLine + cNewLine;
+        const rowVals = outputT.size / outputT.dims[2];
+        
+        for (var y=0; y<outputT.size; y+=rowVals) {
+            for (var x=0; x<cNumValues; x++) {
+                alloutputHtml += "output.data[" + y + " + " + x + "]: " + outputT.data[y + x] + cNewLine;
+            }
+        }
+    }
+
+    return outputHtml;
+}
+
+function runOpTest (completeCallback, errCallback) {
     
     const backend = document.getElementById(cBackendSelectId).value;
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
@@ -183,35 +252,15 @@ function runOpTest (outputElem) {
 
         const inputT = new onnx.Tensor(x, 'float32', [1,n,h,w]);
         
-        outputElem.innerHTML += "output:" + cNewLine;
-        outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
         sess.run([inputT]).then(output=>{
-            const outputT = output.values().next().value;
-
-            outputElem.innerHTML += "model output tensor size:" + outputT.size + cNewLine + cNewLine;
-            
-            // display first few floats
-            var i;
-            const cNumValues = 16
-            for (var i=0; i<cNumValues; i++) {
-                outputElem.innerHTML += "output.data[" + i + "]: " + outputT.data[i] + cNewLine;
-            }
-            outputElem.innerHTML += "... ... ..." + cNewLine;
-            //outputElem.innerHTML += cNewLine;
-
-            // display few floats in the middle of the image
-            const cSkip = h*w/2;
-            for (var j=0; j<cNumValues; j++) {
-                const i = j + cSkip;
-                outputElem.innerHTML += "outout.data[" + i + "]: " + outputT.data[i] + cNewLine;
-            }
-            outputElem.innerHTML += "... ... ..." + cNewLine;
-            outputElem.innerHTML += cNewLine;
+            completeCallback(output);
         }).catch ((e) => {
-            outputElem.innerHTML += "!!!inference error!!! " + cNewLine + e + cNewLine;
+            errHtml = "!!!inference error!!! " + cNewLine + e + cNewLine;
+            errCallback(errHtml);
         });
     }).catch((e)=> {
-        outputElem.innerHTML += "!!!load error!!! " + cNewLine + e + cNewLine;
+        errHtml = "!!!load error!!! " + cNewLine + e + cNewLine;
+        errCallback(errHtml);
     });
 
 }
