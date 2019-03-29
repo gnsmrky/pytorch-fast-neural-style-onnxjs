@@ -119,11 +119,11 @@ function htmlOnRunOpTest() {
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
-    inferResultStr  = "```" + cNewLine;
-    inferResultStr += "ONNX.js Op Test" + cNewLine;
+    // log output
+    inferResultStr  = "ONNX.js Op Test" + cNewLine;
     inferResultStr += "======================================================================" + cNewLine;
     inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
-    
+
     // log backend info
     backend = backendSelectElem.value;
     inferResultStr += "backend: " + backend + cNewLine;
@@ -132,6 +132,9 @@ function htmlOnRunOpTest() {
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
     const modelUrl = cModelList[opModelIdx].model_url;
     inferResultStr += "model file: " + modelUrl + cNewLine;
+    
+    // onnx graph file
+    inferResultStr += "<img src='" + onnxGraphElem.src + "' height='200'>" + cNewLine;
 
     inferResultStr += cNewLine;
     inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
@@ -157,9 +160,6 @@ function htmlOnRunOpTest() {
     }
     inferResultStr += cNewLine;
 
-    // onnx graph file
-    inferResultStr += "[onnx graph](" + onnxGraphElem.src + ")" + cNewLine + cNewLine;
-
     // create partial output text area
     const logOutputElemId = "resultLogElem";
     logOutputDiv.innerHTML = "<textarea id='" + logOutputElemId + "' readonly cols=90 rows=30></textarea>";
@@ -167,12 +167,10 @@ function htmlOnRunOpTest() {
     // add copy button
     copyButtonDiv.innerHTML = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
     
-    // create all output text area
-    //const logAllOutputElemId = "allResultLogElem";
-    //logAllOutputDiv.innerHTML = "<textarea id='" + logAllOutputElemId + "' readonly cols=90 rows=30></textarea>";
-
     // load & run inference
-    outputElem    = document.getElementById(logOutputElemId);
+    inferResultStr += "```" + cNewLine;
+
+    outputElem = document.getElementById(logOutputElemId);
     asyncSetHtml (outputElem, inferResultStr).then( ()=> {
             runOpTest((output)=> {
                 outputElem.innerHTML += "output:" + cNewLine;
