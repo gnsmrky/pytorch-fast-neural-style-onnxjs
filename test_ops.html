@@ -88,6 +88,11 @@ function asyncSetHtml (elemNode, html) {
   return p;
 }
 
+function htmlClearUI (){
+    logOutputDiv.innerHTML  = "";
+    copyButtonDiv.innerHTML = "";
+}
+
 function htmlGenerateUI () {
     htmlGenerateModelList(opModelSelectElem);
 }
@@ -107,10 +112,12 @@ function htmlGenerateModelList (listElem) {
 }
 
 function htmlOnBackendSelectChange() {
-    
+    htmlClearUI();
 }
 
 function htmlOnOpModelSelectChange() {
+    htmlClearUI();
+
     const modelIdx = opModelSelectElem.value;
     
     const list = cModelList;
@@ -121,6 +128,11 @@ function htmlOnCopyToClipboard (textAreaElem) {
     //outputElem = document.getElementById(textAreaId);
     textAreaElem.select();
     document.execCommand("copy");
+
+    // add post link only after "copy" command is cone
+    issueIdx = isMobile() ? 2 : 1;
+    issueTypeStr = issueIdx ? "desktop" : "mobile";
+    copyButtonDiv.innerHTML += "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
 }
 
 function htmlOnRunOpTest() {
@@ -131,13 +143,21 @@ function htmlOnRunOpTest() {
     
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
 
-    // user input for models
-    inferResultStr  = "System Model: [manual input]" + cNewLine;
-    inferResultStr += cNewLine;
+    const device = uap.getDevice();
+    if (device.model) {
+        inferResultStr += "device model: " + device.model + cNewLine;
+        inferResultStr += "device type: " + device.type + cNewLine;
+        inferResultStr += "device vendor: " + device.vendor + cNewLine;
+    } else {
+        // user input for models
+        inferResultStr  = "System Model: [manual input]" + cNewLine;
+        inferResultStr += cNewLine;
+    }
+
 
     // log output
     inferResultStr += "ONNX.js Op Test - " + cModelList[opModelIdx].name + cNewLine;
-    inferResultStr += "======================================================================" + cNewLine;
+    inferResultStr += "----------------------------------------------------------------------" + cNewLine;
     inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
 
     // log backend info
@@ -183,44 +203,33 @@ function htmlOnRunOpTest() {
     copyButtonDiv.innerHTML  = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
     copyButtonDiv.innerHTML += "&nbsp;&nbsp;&nbsp;";
 
-    // add post link
-    issueIdx = isMobile() ? 2 : 1;
-    issueTypeStr = issueIdx ? "desktop" : "mobile";
-    copyButtonDiv.innerHTML += "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
-
-    // add link to issue #1, where users can post the result.
-
-    
     // load & run inference
     inferResultStr += "```" + cNewLine;
 
     outputElem = document.getElementById(logOutputElemId);
     asyncSetHtml (outputElem, inferResultStr).then( ()=> {
-            runOpTest((output)=> {
-                outputElem.innerHTML += "output:" + cNewLine;
-                outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
+        runOpTest((output)=> {
+            outputElem.innerHTML += "output:" + cNewLine;
+            outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
 
-                const outputT = output.values().next().value;
-                outputElem.innerHTML += "output tensor dimension:" + outputT.dims + cNewLine;
-                outputElem.innerHTML += "output tensor size:" + outputT.size + cNewLine + cNewLine;
-                
-                outputElem.innerHTML += makeOutputHtml(outputT, true);
+            const outputT = output.values().next().value;
+            outputElem.innerHTML += "output tensor dimension:" + outputT.dims + cNewLine;
+            outputElem.innerHTML += "output tensor size:" + outputT.size + cNewLine + cNewLine;
+            
+            outputElem.innerHTML += makeOutputHtml(outputT, true);
 
-                outputElem.innerHTML += "```";
+            outputElem.innerHTML += "```";
 
-            }, (errorHtml)=>{
-                outputElem.innerHTML += errorHtml;
-            });
+        }, (errorHtml)=>{
+            outputElem.innerHTML += errorHtml;
         });
-    
+    });
 }
 
 function makeOutputHtml (outputT, isPartialOutput) {
-    // display first few floats
-    var i;
     const cNumValues = 16
-
     outputHtml = "";
+
     if (isPartialOutput) { // partial output
         outputHtml += "row 0:" + cNewLine;
         for (var i=0; i<cNumValues; i++) {
@@ -238,7 +247,7 @@ function makeOutputHtml (outputT, isPartialOutput) {
         }
         outputHtml += "... ... ..." + cNewLine;
         outputHtml += cNewLine;
-    } else { // full output
+    } else { // full output, output first 16 values of each row
         alloutputHtml += "model output tensor size:" + outputT.size + cNewLine + cNewLine;
         const rowVals = outputT.size / outputT.dims[2];
         
