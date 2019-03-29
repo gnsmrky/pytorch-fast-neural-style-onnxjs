@@ -153,17 +153,18 @@ function htmlOnRunOpTest() {
     // detect device model
     const device = uap.getDevice();
     if (device.model) {
-        inferResultStr += "device vendor: " + device.vendor + cNewLine;
-        inferResultStr += "device type: " + device.type + cNewLine;
-        if (device.model) {
-            // this is a workaround for UAParser() that the model does not include model number after space.
-            //var patt1 = "/" + device.model + "([^)]+)/gi";
-            //var deviceModel = uaStr.match(patt1);
-            patt = new RegExp("Pixel\(\[\^\)\]\+\)", "gi");
-            deviceModel = patt.exec(uaStr);
+        patt = new RegExp(device.model + "\(\[\^\)\]\+\)", "gi");
+        deviceModel = patt.exec(uaStr);
 
-            inferResultStr += "device model: " + deviceModel[0] + cNewLine;
+        if (deviceModel) {
+            // found more numbers after device.model
+            inferResultStr += "device model: " + device.vendor + " " + deviceModel[0] + cNewLine;
+        } else {
+            // no more numbers found, just use the original device model from UAParser()
+            inferResultStr += "device model: " + device.vendor + " " + device.model + cNewLine;
         }
+        
+        inferResultStr += "device type: " + device.type + cNewLine;
         inferResultStr += cNewLine;
     } else {
         // user input for models
