@@ -129,12 +129,14 @@ function htmlOnRunOpTest() {
     uap.setUA(navigator.userAgent);
     var uapRes = uap.getResult();
     
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+
     // user input for models
     inferResultStr  = "System Model: [manual input]" + cNewLine;
     inferResultStr += cNewLine;
 
     // log output
-    inferResultStr += "ONNX.js Op Test" + cNewLine;
+    inferResultStr += "ONNX.js Op Test - " + cModelList[opModelIdx].name + cNewLine;
     inferResultStr += "======================================================================" + cNewLine;
     inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
 
@@ -143,7 +145,6 @@ function htmlOnRunOpTest() {
     inferResultStr += "backend: " + backend + cNewLine;
     
     // log onnx model file
-    const opModelIdx = document.getElementById(cOpModelSelectId).value;
     const modelUrl = cModelList[opModelIdx].model_url;
     inferResultStr += "model file: " + modelUrl + cNewLine;
     
