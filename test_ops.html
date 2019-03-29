@@ -46,7 +46,13 @@
 </p>
 
 <p>
-<div id="copyButtonDiv"></div>
+<table>
+    <tr>
+        <td><div id="copyButtonDiv"></div></td>
+        <td>&nbsp;&nbsp;</td>
+        <td><div id="postLinkDiv"></div></td>
+    </tr>
+</table>
 </p>
 
 <p>
@@ -69,7 +75,7 @@ const cModelList = [
 
 const cNewLine = String.fromCharCode(13, 10);
 
-function isMobile() {
+function uaIsMobile() {
   var uap = new UAParser();
   uap.setUA(navigator.userAgent);
 
@@ -91,6 +97,7 @@ function asyncSetHtml (elemNode, html) {
 function htmlClearUI (){
     logOutputDiv.innerHTML  = "";
     copyButtonDiv.innerHTML = "";
+    postLinkDiv.innerHTML = "";
 }
 
 function htmlGenerateUI () {
@@ -130,9 +137,10 @@ function htmlOnCopyToClipboard (textAreaElem) {
     document.execCommand("copy");
 
     // add post link only after "copy" command is cone
-    issueIdx = isMobile() ? 2 : 1;
-    issueTypeStr = issueIdx ? "desktop" : "mobile";
-    copyButtonDiv.innerHTML += "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
+    isMobile = uaIsMobile();
+    issueIdx = isMobile ? 2 : 1;
+    issueTypeStr = isMobile ? "mobile" : "desktop";
+    postLinkDiv.innerHTML = "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
 }
 
 function htmlOnRunOpTest() {
@@ -144,8 +152,8 @@ function htmlOnRunOpTest() {
     
     // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
     //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36";
-    uap.setUA(uaStr);
     
+    uap.setUA(uaStr);
     var uapRes = uap.getResult();
     
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
@@ -218,7 +226,7 @@ function htmlOnRunOpTest() {
 
     // add copy button
     copyButtonDiv.innerHTML  = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
-    copyButtonDiv.innerHTML += "&nbsp;&nbsp;&nbsp;";
+    //copyButtonDiv.innerHTML += "&nbsp;&nbsp;&nbsp;";
 
     // load & run inference
     inferResultStr += "```" + cNewLine;
