@@ -140,7 +140,12 @@ function htmlOnRunOpTest() {
 
     // log browser info
     var uap = new UAParser();
-    uap.setUA(navigator.userAgent);
+    const uaStr = navigator.userAgent;
+    
+    // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
+    //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36";
+    uap.setUA(uaStr);
+    
     var uapRes = uap.getResult();
     
     const opModelIdx = document.getElementById(cOpModelSelectId).value;
@@ -150,7 +155,16 @@ function htmlOnRunOpTest() {
     if (device.model) {
         inferResultStr += "device vendor: " + device.vendor + cNewLine;
         inferResultStr += "device type: " + device.type + cNewLine;
-        inferResultStr += "device model: " + device.model + cNewLine;
+        if (device.model) {
+            // this is a workaround for UAParser() that the model does not include model number after space.
+            //var patt1 = "/" + device.model + "([^)]+)/gi";
+            //var deviceModel = uaStr.match(patt1);
+            patt = new RegExp("Pixel\(\[\^\)\]\+\)", "gi");
+            deviceModel = patt.exec(uaStr);
+
+            inferResultStr += "device model: " + deviceModel[0] + cNewLine;
+        }
+        inferResultStr += cNewLine;
     } else {
         // user input for models
         inferResultStr  = "System Model: [manual input]" + cNewLine;
