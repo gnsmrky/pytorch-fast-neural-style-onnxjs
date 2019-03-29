@@ -136,11 +136,11 @@ function htmlOnCopyToClipboard (textAreaElem) {
     textAreaElem.select();
     document.execCommand("copy");
 
-    // add post link only after "copy" command is cone
+    // add post link only after "copy" command is done
     isMobile = uaIsMobile();
     issueIdx = isMobile ? 2 : 1;
     issueTypeStr = isMobile ? "mobile" : "desktop";
-    postLinkDiv.innerHTML = "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post the result here for " + issueTypeStr + "</a>";
+    postLinkDiv.innerHTML = "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post/paste the result here for " + issueTypeStr + "</a>";
 }
 
 function htmlOnRunOpTest() {
