@@ -144,7 +144,8 @@ function htmlOnCopyToClipboard (textAreaElem) {
 }
 
 function htmlOnRunOpTest() {
-    inferResultStr = "";
+    inferResultStr  = "Description:" + cNewLine;
+    inferResultStr += cNewLine + cNewLine + cNewLine;
 
     // log browser info
     var uap = new UAParser();
@@ -161,22 +162,24 @@ function htmlOnRunOpTest() {
     // detect device model
     const device = uap.getDevice();
     if (device.model) {
+        // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
+        // found more numbers after device.model.
         patt = new RegExp(device.model + "\(\[\^\)\]\+\)", "gi");
         deviceModel = patt.exec(uaStr);
 
+        dm = deviceModel ? deviceModel[0] : device.model;
         if (deviceModel) {
             // found more numbers after device.model
-            inferResultStr += "device model: " + device.vendor + " " + deviceModel[0] + cNewLine;
-        } else {
-            // no more numbers found, just use the original device model from UAParser()
-            inferResultStr += "device model: " + device.vendor + " " + device.model + cNewLine;
+            dm = deviceModel[0];
         }
+
+        inferResultStr += "device model: " + device.vendor + " " + dm + cNewLine;
         
         inferResultStr += "device type: " + device.type + cNewLine;
         inferResultStr += cNewLine;
     } else {
         // user input for models
-        inferResultStr  = "System Model: [manual input]" + cNewLine;
+        inferResultStr += "System Model: [manual input]" + cNewLine;
         inferResultStr += cNewLine;
     }
 
