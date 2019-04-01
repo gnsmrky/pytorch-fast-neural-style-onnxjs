@@ -85,6 +85,22 @@ function uaIsMobile() {
   return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
 }
 
+function uaGetMobileDeviceModel (uaStr) {
+    // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
+    
+    if (uaStr.toLowerCase().indexOf("android") < 0)
+        return "";
+
+    // get the "(Linux; Android #.#; Model number)" in UA string
+    patt = /\(([A-Z-.0-9 ]+[^)])+\)/gi;
+    mobileModel = patt.exec(uaStr);
+
+    // get model alpha-numeric part of UA string
+    deviceModel = mobileModel[1].trim();
+
+    return deviceModel;
+}
+
 function asyncSetHtml (elemNode, html) {
   var p = new Promise( (resolve, reject) => {
     elemNode.innerHTML = html;
@@ -144,7 +160,7 @@ function htmlOnCopyToClipboard (textAreaElem) {
 }
 
 function htmlOnRunOpTest() {
-    inferResultStr  = "Description:" + cNewLine;
+    inferResultStr  = "Description: [describe the result here]" + cNewLine;
     inferResultStr += cNewLine + cNewLine + cNewLine;
 
     // log browser info
@@ -152,8 +168,10 @@ function htmlOnRunOpTest() {
     const uaStr = navigator.userAgent;
     
     // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
-    //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36";
-    
+    //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Google Pixel 3
+    //const uaStr = "Mozilla/5.0 (Linux; Android 9; CLT-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Huawei P20 Pro
+    //const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
+
     uap.setUA(uaStr);
     var uapRes = uap.getResult();
     
@@ -161,25 +179,29 @@ function htmlOnRunOpTest() {
     
     // detect device model
     const device = uap.getDevice();
-    if (device.model) {
-        // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
-        // found more numbers after device.model.
-        patt = new RegExp(device.model + "\(\[\^\)\]\+\)", "gi");
-        deviceModel = patt.exec(uaStr);
+    var deviceModel = "";
 
-        dm = deviceModel ? deviceModel[0] : device.model;
-        if (deviceModel) {
-            // found more numbers after device.model
-            dm = deviceModel[0];
-        }
+    if (device.type =='mobile') {
+        deviceModel = uaGetMobileDeviceModel(uaStr);
 
-        inferResultStr += "device model: " + device.vendor + " " + dm + cNewLine;
+        deviceVendor = device.vendor ? device.vendor : "";
+        inferResultStr += "device model: " + deviceVendor + " " + deviceModel + cNewLine;
         
         inferResultStr += "device type: " + device.type + cNewLine;
         inferResultStr += cNewLine;
-    } else {
-        // user input for models
-        inferResultStr += "System Model: [manual input]" + cNewLine;
+    }
+    
+    if (deviceModel == "") {
+        // try one more time to detect mobile device model
+        deviceModel = uaGetMobileDeviceModel(uaStr);
+        if (deviceModel != "") {
+            inferResultStr += "device model: " + deviceModel + cNewLine;
+        } else {
+            // user input for models
+            inferResultStr += "System Model: [manual input system model here]" + cNewLine;
+        }
+        
+        inferResultStr += cNewLine;
         inferResultStr += cNewLine;
     }
 
