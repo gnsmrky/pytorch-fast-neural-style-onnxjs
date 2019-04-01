@@ -370,7 +370,7 @@ function htmlGenerateUI () {
   htmlGenerateContentList (contentImgSelect);
   htmlGenerateResult      ();
 
-  onRunFNSInfer();
+  //onRunFNSInfer();
 }
 
 function htmlGenerateStyleList (styleListElem) {
@@ -483,6 +483,7 @@ async function onRunFNSInfer () {
   // disable UI
   styleSelect.disabled = true;
   contentImgSelect.disabled = true;
+  runInferButton.disabled = true;
 
   //inferResultStr = "loading onnx model..." + newLine;
   inferResultStr = "";
@@ -504,6 +505,7 @@ async function onRunFNSInfer () {
         // enable UI
         styleSelect.disabled = false;
         contentImgSelect.disabled = false;
+        runInferButton.disabled = false;
         
         asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
         });
