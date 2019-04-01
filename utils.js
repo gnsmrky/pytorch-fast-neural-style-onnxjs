@@ -369,6 +369,8 @@ function htmlGenerateUI () {
   htmlGenerateStyleList   (styleSelect);
   htmlGenerateContentList (contentImgSelect);
   htmlGenerateResult      ();
+
+  onRunFNSInfer();
 }
 
 function htmlGenerateStyleList (styleListElem) {
@@ -409,6 +411,9 @@ function onStyleSelectChange() {
 
   // dispose inference session
   g_onnxSess = null;
+
+  // run inference
+  onRunFNSInfer();
 }
 
 function htmlGenerateContentList(contentImgList) {
@@ -475,27 +480,35 @@ async function onRunFNSInfer () {
     await g_onnxSess.loadModel(onnxModelUrl);
   }
 
+  // disable UI
+  styleSelect.disabled = true;
+  contentImgSelect.disabled = true;
+
   //inferResultStr = "loading onnx model..." + newLine;
   inferResultStr = "";
   asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
-    //g_onnxSess.loadModel(onnxModelUrl).then( ()=> {
-      srcTensor = canvasToTensor(srcCanvasId);
+    srcTensor = canvasToTensor(srcCanvasId);
 
-      inferResultStr += "running fast neural style..." + newLine;
-      asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
-        g_onnxSess.run([srcTensor]).then( (pred)=>{
-          const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
-                                                      //    only for the case of single output node. 
-          
-          // set output canvas
-          tensorToCanvas (output, dstCanvasId);
-          
-          inferResultStr += "done" + newLine;
-          asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
-          });
+    inferResultStr += "running fast neural style..." + newLine;
+    asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+
+      g_onnxSess.run([srcTensor]).then( (pred)=>{
+        const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
+                                                    //    only for the case of single output node. 
+        
+        // set output canvas
+        tensorToCanvas (output, dstCanvasId);
+        
+        inferResultStr += "done" + newLine;
+
+        // enable UI
+        styleSelect.disabled = false;
+        contentImgSelect.disabled = false;
+        
+        asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
         });
       });
-    //});
+    });
   });
 }
 
