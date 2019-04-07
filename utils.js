@@ -143,6 +143,11 @@ const benchmark_style_list_cpu = [
   style_mosaic_nc8_256x256_cpu
 ];
 
+const benchmark_style_list_wasm = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu
+];
+
 // content images
 const content_url_list = [
   { name:"amber",     img_url:"./images/amber_256x256.jpg", credit_url: "unsplash.com" },
@@ -319,6 +324,8 @@ function getStyleList () {
     return style_list_webgl;
   } else if (backend == 'cpu') {
     return style_list_cpu;
+  } else if (backend == 'wasm') {
+    return style_list_wasm;
   } else {
     return style_list_webgl;
   }
@@ -332,6 +339,8 @@ function benchmark_getStyleList () {
     return benchmark_style_list_webgl;
   } else if (backend == 'cpu') {
     return benchmark_style_list_cpu;
+  } else if (backend == 'wasm') {
+    return benchmark_style_list_wasm;
   } else {
     return benchmark_style_list_webgl;
   }
