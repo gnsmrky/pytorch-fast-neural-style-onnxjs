@@ -171,7 +171,7 @@ const dstCanvasId = "canvas_dst"; // outputs inference output
 var g_onnxSess = null;
 const g_benchmark_contentImgUrl =  content_url_list[0].img_url;
 
-const totalInferCount  = 10;    // total number of inferences to run.
+const totalInferCount  = 30;    // total number of inferences to run.
 const inferDisplayTime = 50;  // in ms, time to show the inference output.
 const asyncTimeout     = 10;
 
