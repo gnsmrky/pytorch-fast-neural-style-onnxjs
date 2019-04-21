@@ -78,8 +78,12 @@ const cModelList = [
 const cNewLine = String.fromCharCode(13, 10);
 
 function uaIsMobile() {
+    return (uaIsMobile(navigator.userAgent));
+}
+
+function uaIsMobile(uaStr) {
   var uap = new UAParser();
-  uap.setUA(navigator.userAgent);
+  uap.setUA(uaStr);
 
   var uapRes = uap.getResult();
   const osName = uapRes.os.name.toLowerCase();
@@ -93,15 +97,37 @@ function uaGetMobileDeviceModel (uaStr) {
     if (uaStr.toLowerCase().indexOf("android") < 0)
         return "";
 
-    // get the "(Linux; Android #.#; Model number)" in UA string
+    // get the "(Linux; Android #.#; Model number)" in UA string.
+    // should return 2 alpha numeric strings: Android #.#, Model Number
     patt = /\(([A-Z-.0-9 ]+[^)])+\)/gi;
     mobileModel = patt.exec(uaStr);
 
-    // get model alpha-numeric part of UA string
+    // Model number is the 2nd string
     deviceModel = mobileModel[1].trim();
 
     return deviceModel;
 }
+
+/*
+function uaGetDeviceModel (uaStr) {
+    // only mobile device has model number in UA string.
+    if (!uaIsMobile()) {
+        return "";
+    }
+
+    // US Parser
+    var uap = new UAParser();
+    const uaStr = navigator.userAgent;
+    
+    uap.setUA(uaStr);
+
+    // detect device model
+    const device = uap.getDevice();
+    var deviceModel = uaGetMobileDeviceModel(uaStr);
+
+    return deviceModel;
+}
+*/
 
 function asyncSetHtml (elemNode, html) {
   var p = new Promise( (resolve, reject) => {
@@ -177,22 +203,31 @@ function htmlOnRunOpTest() {
     uap.setUA(uaStr);
     var uapRes = uap.getResult();
     
-    const opModelIdx = document.getElementById(cOpModelSelectId).value;
-    
-    // detect device model
+    // log device model
     const device = uap.getDevice();
-    var deviceModel = "";
 
-    if (device.type =='mobile') {
-        deviceModel = uaGetMobileDeviceModel(uaStr);
+    if (uaIsMobile(uaStr)) {
+        var deviceModel = uaGetMobileDeviceModel(uaStr);
 
         deviceVendor = device.vendor ? device.vendor : "";
         inferResultStr += "device model: " + deviceVendor + " " + deviceModel + cNewLine;
-        
-        inferResultStr += "device type: " + device.type + cNewLine;
+
+        if (device.type) {
+            inferResultStr += "device type: " + device.type + cNewLine;
+        }
+
+        inferResultStr += cNewLine;
+        inferResultStr += cNewLine;
+
+    } else {
+        // desktop OS has no model number.  prompt for manual input
+        inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+
+        inferResultStr += cNewLine;
         inferResultStr += cNewLine;
     }
     
+    /*
     if (deviceModel == "") {
         // try one more time to detect mobile device model
         deviceModel = uaGetMobileDeviceModel(uaStr);
@@ -202,12 +237,16 @@ function htmlOnRunOpTest() {
             // user input for models
             inferResultStr += "System Model: [manual input system model here]" + cNewLine;
         }
-        
+        inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+
         inferResultStr += cNewLine;
         inferResultStr += cNewLine;
     }
+    */
 
     // log output
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    
     inferResultStr += "ONNX.js Op Test - " + cModelList[opModelIdx].name + cNewLine;
     inferResultStr += "----------------------------------------------------------------------" + cNewLine;
     inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;

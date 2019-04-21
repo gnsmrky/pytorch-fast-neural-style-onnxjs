@@ -188,7 +188,7 @@ var inferCountDown = 0;
 
 // inference result text
 var inferResultStr = "";
-const newLine = String.fromCharCode(13, 10);
+const cNewLine = String.fromCharCode(13, 10);
 
 //
 // loadImage()
@@ -216,6 +216,7 @@ function loadImage (imageUrl, canvasId, completeProc=null) {
   }
 }
 
+/*
 function isMobile() {
   var uap = new UAParser();
   uap.setUA(navigator.userAgent);
@@ -224,6 +225,38 @@ function isMobile() {
   const osName = uapRes.os.name.toLowerCase();
 
   return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+*/
+
+function uaIsMobile() {
+  return (uaIsMobile(navigator.userAgent));
+}
+
+function uaIsMobile(uaStr) {
+var uap = new UAParser();
+uap.setUA(uaStr);
+
+var uapRes = uap.getResult();
+const osName = uapRes.os.name.toLowerCase();
+
+return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+
+function uaGetMobileDeviceModel (uaStr) {
+  // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
+  
+  if (uaStr.toLowerCase().indexOf("android") < 0)
+      return "";
+
+  // get the "(Linux; Android #.#; Model number)" in UA string.
+  // should return 2 alpha numeric strings: Android #.#, Model Number
+  patt = /\(([A-Z-.0-9 ]+[^)])+\)/gi;
+  mobileModel = patt.exec(uaStr);
+
+  // Model number is the 2nd string
+  deviceModel = mobileModel[1].trim();
+
+  return deviceModel;
 }
 
 // canvas utilities
@@ -494,12 +527,12 @@ async function onRunFNSInfer () {
   contentImgSelect.disabled = true;
   runInferButton.disabled = true;
 
-  //inferResultStr = "loading onnx model..." + newLine;
+  //inferResultStr = "loading onnx model..." + cNewLine;
   inferResultStr = "";
   asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
     srcTensor = canvasToTensor(srcCanvasId);
 
-    inferResultStr += "running fast neural style..." + newLine;
+    inferResultStr += "running fast neural style..." + cNewLine;
     asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
 
       g_onnxSess.run([srcTensor]).then( (pred)=>{
@@ -509,7 +542,7 @@ async function onRunFNSInfer () {
         // set output canvas
         tensorToCanvas (output, dstCanvasId);
         
-        inferResultStr += "done" + newLine;
+        inferResultStr += "done" + cNewLine;
 
         // enable UI
         styleSelect.disabled = false;
@@ -604,7 +637,7 @@ function htmlBench_onRunFNSBenchmark() {
   
   inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=20></textarea>";
 
-  inferResultStr = "PyTorch fast-neural-style (FNS) benchmark using ONNX.js " + onnxjs_version + newLine;
+  inferResultStr = "PyTorch fast-neural-style (FNS) benchmark using ONNX.js " + onnxjs_version + cNewLine;
 
   // date & time
   const currentDate = new Date();
@@ -615,51 +648,79 @@ function htmlBench_onRunFNSBenchmark() {
   var hour  = currentDate.getHours();
   var min   = currentDate.getMinutes();
   var sec   = currentDate.getSeconds();
-  var dateStr = year + "/" + (month + 1) + "/" + date + "     " + hour + ":" + min + ":" + sec  + newLine + newLine;
+  var dateStr = year + "/" + (month + 1) + "/" + date + "     " + hour + ":" + min + ":" + sec  + cNewLine + cNewLine;
 
   inferResultStr += "Date: " + dateStr;
+
+  // UA Parser
+  var uap = new UAParser();
+  //const uaStr = navigator.userAgent;
+  
+  // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
+  //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Google Pixel 3
+  //const uaStr = "Mozilla/5.0 (Linux; Android 9; CLT-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Huawei P20 Pro
+  const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
+
+  uap.setUA(uaStr);
+  var uapRes = uap.getResult();
+  const device = uap.getDevice();
+
+  // log device model
+  if (uaIsMobile(uaStr)) {
+      var deviceModel = uaGetMobileDeviceModel(uaStr);
+
+      deviceVendor = device.vendor ? device.vendor : "";
+      inferResultStr += "device model: " + deviceVendor + " " + deviceModel + cNewLine;
+
+      if (device.type) {
+          inferResultStr += "device type: " + device.type + cNewLine;
+      }
+  } else {
+      // desktop OS has no model number.  prompt for manual input
+      inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+  }
 
   // log browser info
   var uap = new UAParser();
   uap.setUA(navigator.userAgent);
   var uapRes = uap.getResult();
 
-  inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + newLine;
-  inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + newLine;
-  inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + newLine;
+  inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
+  inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
+  inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + cNewLine;
 
-  inferResultStr += newLine;
+  inferResultStr += cNewLine;
 
   // log cpu arch info
-  inferResultStr += "cpu arch: " + uapRes.cpu.architecture + newLine;
+  inferResultStr += "cpu arch: " + uapRes.cpu.architecture + cNewLine;
 
   // log gpu info
   var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
   if (glCtx == null) {
-    inferResultStr += "cannot get 'webgl' context..." + newLine;
+    inferResultStr += "cannot get 'webgl' context..." + cNewLine;
   } else {
     var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
     if (glInfo != null) {
-      inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + newLine;
+      inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + cNewLine;
     } else {
-      inferResultStr += "gpu: unknown" + newLine;
+      inferResultStr += "gpu: unknown" + cNewLine;
     }
   }
-  inferResultStr += newLine;
+  inferResultStr += cNewLine;
 
   // log backend info
-  inferResultStr += "ONNX.js backend: " + backend + newLine;
+  inferResultStr += "ONNX.js backend: " + backend + cNewLine;
 
   // log inference info
-  inferResultStr += "loading '" + onnxModelUrl + "'" + newLine;
+  inferResultStr += "loading '" + onnxModelUrl + "'" + cNewLine;
   inferResultsText.innerHTML = inferResultStr;
   
   var loadModelT0 = performance.now();
   g_onnxSess.loadModel(onnxModelUrl).then( ()=>{
     var loadModelTStr = formatFloat(performance.now() - loadModelT0) + "ms";
-    inferResultStr += "load time: " + loadModelTStr + newLine;
+    inferResultStr += "load time: " + loadModelTStr + cNewLine;
 
-    inferResultStr += "warming up tensors... " + newLine;
+    inferResultStr += "warming up tensors... " + cNewLine;
 
     asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
 
@@ -672,15 +733,15 @@ function htmlBench_onRunFNSBenchmark() {
         g_onnxSess.run([warmTensor]).then( (output)=> {
           const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
     
-          inferResultStr += "warm up time: " + warmTStr + newLine;
-          inferResultStr += newLine;
+          inferResultStr += "warm up time: " + warmTStr + cNewLine;
+          inferResultStr += cNewLine;
 
           asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
             runFNSCount();
           });
         });
       } catch (e) {
-        inferResultStr += "warmup error: " + e + newLine;
+        inferResultStr += "warmup error: " + e + cNewLine;
         inferResultsText.innerHTML += inferResultStr;
       }
     });
@@ -698,10 +759,10 @@ function FNSRunCompleteCallback() {
   const m = total / len;
   const mStr = formatFloat(m) + "ms";
 
-  inferResultStr += newLine;
-  inferResultStr += "average inference time: " + mStr + newLine;
+  inferResultStr += cNewLine;
+  inferResultStr += "average inference time: " + mStr + cNewLine;
 
-  inferResultsText.innerHTML = "```" + newLine + inferResultStr + "```" + newLine;
+  inferResultsText.innerHTML = "```" + cNewLine + inferResultStr + "```" + cNewLine;
   inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
 
   // add copy button
@@ -730,7 +791,7 @@ function runFNSCount(){
       pred = await g_onnxSess.run([input]);
     } catch (e) {
         console.error(e);
-        inferResultStr += "error: " + e + newLine;
+        inferResultStr += "error: " + e + cNewLine;
     }
 
 
@@ -744,32 +805,32 @@ function runFNSCount(){
     const h = output.dims[2];
     const w = output.dims[3];
     var t_data = output.data;
-    inferResultStr += "output.h:" + h + newLine;
-    inferResultStr += "output.w:" + w + newLine;
-    inferResultStr += "output.data length:" + t_data.length + newLine;
+    inferResultStr += "output.h:" + h + cNewLine;
+    inferResultStr += "output.w:" + w + cNewLine;
+    inferResultStr += "output.data length:" + t_data.length + cNewLine;
     */
     /*
     var j = 0;
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
 
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
-    inferResultStr += "input['" + j + "']: " + input.data[j] + newLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
     
     var j = 0;
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
 
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
-    inferResultStr += "output['" + j + "']: " + output.data[j] + newLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
 
     tensorToCanvas (output, dstCanvasId);
 
-    inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
+    inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + cNewLine;
     inferResultsText.innerHTML += inferResultStr;
     
     inferCountDown--;
@@ -801,7 +862,7 @@ function runFNSCount(){
       // set output canvas
       tensorToCanvas (output, dstCanvasId);
 
-      inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + newLine;
+      inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + cNewLine;
       asyncSetHtml(inferResultsText, inferResultStr).then( ()=> {
         inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
 
