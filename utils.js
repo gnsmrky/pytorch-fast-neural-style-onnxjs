@@ -654,12 +654,12 @@ function htmlBench_onRunFNSBenchmark() {
 
   // UA Parser
   var uap = new UAParser();
-  //const uaStr = navigator.userAgent;
+  const uaStr = navigator.userAgent;
   
   // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
   //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Google Pixel 3
   //const uaStr = "Mozilla/5.0 (Linux; Android 9; CLT-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Huawei P20 Pro
-  const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
+  //const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
 
   uap.setUA(uaStr);
   var uapRes = uap.getResult();
