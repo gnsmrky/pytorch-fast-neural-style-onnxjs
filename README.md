@@ -55,7 +55,7 @@ The following were the *few of* major obstacles encountered during the process, 
 4. **Dynamic tensor shapes exported by PyTorch ONNX is *very* large and hogs memory like hell.**
    * If any op node depends on input/out tensor shape dynamically when doing inferencing, the result ONNX model graph can be absurdly huge (.onnx file at ~350MB) and highly complex (Composed of multiple `Reshape` and `Gather` ops).  Although still works, it is not practical to use such model files in web browsers.
 
-For more details, please see [PyTorch fast-neural-style for web](https://github.com/gnsmrky/pytorch-fast-neural-style-for-web)
+For more details on tweaking and working around the differences between PyTorch, Exporter and ONNX.js, please see [PyTorch fast-neural-style for web](https://github.com/gnsmrky/pytorch-fast-neural-style-for-web).
 
 ----------
 # Original Repo
