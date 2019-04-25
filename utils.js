@@ -412,7 +412,8 @@ function htmlGenerateUI () {
   htmlGenerateContentList (contentImgSelect);
   htmlGenerateResult      ();
 
-  //onRunFNSInfer();
+  // auto run the style transfer
+  onRunFNSInfer();
 }
 
 function htmlGenerateStyleList (styleListElem) {
