@@ -10,7 +10,7 @@ This project is roughly based on the following open source projects:
 
 #### Quick links:
 This repo:
-- Goto [PyTorch fast-neural-style](https://gnsmrky.github.io/pytorch-fast-neural-style-onnxjs/) for a quick working web style transfer using ONNX.js.
+- Goto [PyTorch fast-neural-style web](https://gnsmrky.github.io/pytorch-fast-neural-style-onnxjs/) web for a quick working web style transfer using ONNX.js.
 - Goto [PyTorch fast-neural-style web benchmark](https://gnsmrky.github.io/pytorch-fast-neural-style-onnxjs/benchmark.html) as a quick tool for performance on your browser.
 
 How-to guides on tweaking [PyTorch fast-neural-style](https://github.com/pytorch/examples/tree/master/fast_neural_style) repo:
