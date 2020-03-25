@@ -1,5 +1,265 @@
 
 
+// model list
+
+// 128x128 models
+
+// candy - webgl - nc8
+const style_mosaic_nc8_zeropad_128x128 = {
+  style_name: "mosaic zero-pad 128x128 (nc8)",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_zeropad_128x128.onnx"
+};
+
+// mosaic - webgl - nc8
+const style_mosaic_nc8_128x128 = {
+  style_name: "mosaic 128x128 (nc8)",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_128x128_onnxjs014.onnx"
+};
+
+// mosaic - webgl - nc16
+const style_mosaic_nc16_128x128 = {
+  style_name: "mosaic 128x128 (nc16)",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc16_128x128_onnxjs014.onnx"
+};
+
+
+// 256x256 nc8 webl models
+
+// candy - webgl - nc8
+const style_mosaic_nc8_zeropad_256x256 = {
+  style_name: "mosaic zero-pad 256x256 (nc8)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_zeropad_256x256.onnx"
+};
+
+const style_mosaic_nc8_256x256 = {
+  style_name: "mosaic 256x256 (nc8)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014.onnx"
+};
+
+// 256x256 nc16 webl models
+// candy
+const style_candy_nc16_256x256 = {
+  style_name: "candy 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/candy.jpg",
+  model_url: "./onnx_models/candy_nc16_256x256_onnxjs014.onnx"
+};
+
+// mosaic
+const style_mosaic_nc16_256x256 = {
+  style_name: "mosaic 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc16_256x256_onnxjs014.onnx"
+};
+
+// rain-princess
+const style_rainprincess_nc16_256x256 = {
+  style_name: "rain princess 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/rain-princess.jpg",
+  model_url: "./onnx_models/rain-princess_nc16_256x256_onnxjs014.onnx"
+};
+
+// udnie
+const style_udnie_nc16_256x256 = {
+  style_name: "udnie 256x256 (nc16)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/udnie.jpg",
+  model_url: "./onnx_models/udnie_nc16_256x256_onnxjs014.onnx"
+};
+
+
+// mosaic - cpu - nc8
+const style_mosaic_nc8_128x128_cpu = {
+  style_name: "mosaic 128x128 (nc8)",
+  width: 128,
+  height: 128,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_128x128_onnxjs014_cpu.onnx"
+};
+
+const style_mosaic_nc8_256x256_cpu = {
+  style_name: "mosaic 256x256 (nc8)",
+  width: 256,
+  height: 256,
+  thumb_url: "./images/mosaic.jpg",
+  model_url: "./onnx_models/mosaic_nc8_256x256_onnxjs014_cpu.onnx"
+};
+
+const style_list_webgl = [
+  //style_mosaic_nc8_zeropad_128x128,
+  style_mosaic_nc8_zeropad_256x256,
+
+  style_mosaic_nc8_256x256,
+  //style_mosaic_nc16_128x128,
+  style_mosaic_nc16_256x256,
+  style_candy_nc16_256x256,
+  style_rainprincess_nc16_256x256,
+  style_udnie_nc16_256x256
+];
+
+const style_list_cpu = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu
+];
+
+// benchmark style list
+const benchmark_style_list_webgl = [
+  style_mosaic_nc8_zeropad_128x128,
+  style_mosaic_nc8_zeropad_256x256,
+
+  style_mosaic_nc8_128x128,
+  style_mosaic_nc16_128x128,
+
+  style_mosaic_nc8_256x256,
+  style_mosaic_nc16_256x256,
+  style_candy_nc16_256x256,
+  style_rainprincess_nc16_256x256,
+  style_udnie_nc16_256x256
+];
+
+const benchmark_style_list_cpu = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu
+];
+
+const benchmark_style_list_wasm = [
+  style_mosaic_nc8_128x128_cpu,
+  style_mosaic_nc8_256x256_cpu
+];
+
+// content images
+const content_url_list = [
+  { name:"amber",     img_url:"./images/amber_256x256.jpg", credit_url: "unsplash.com" },
+  { name:"boy",       img_url:"./images/boy.jpg", credit_url: "unsplash.com" },
+  { name:"car",       img_url:"./images/car.jpg", credit_url: "unsplash.com" },
+  { name:"cat",       img_url:"./images/cat.jpg", credit_url: "unsplash.com" },
+  { name:"door",      img_url:"./images/door.jpg", credit_url: "unsplash.com" },
+  { name:"flower",    img_url:"./images/flower.jpg", credit_url: "unsplash.com" },
+  { name:"flower2",   img_url:"./images/flower2.jpg", credit_url: "unsplash.com" },
+  { name:"lake house",img_url:"./images/lake_house.jpg", credit_url: "unsplash.com" },
+  { name:"tree",      img_url:"./images/tree.jpg", credit_url: "unsplash.com" },
+  { name:"urban sky", img_url:"./images/urban_sky.jpg", credit_url: "unsplash.com" },
+  { name:"window",    img_url:"./images/window.jpg", credit_url: "unsplash.com" },
+];
+
+// html elements
+const srcCanvasId = "canvas_src"; // shows srcImage
+const dstCanvasId = "canvas_dst"; // outputs inference output
+
+// global params/vars
+var g_onnxSess = null;
+const g_benchmark_contentImgUrl =  content_url_list[0].img_url;
+
+const totalInferCount  = 30;    // total number of inferences to run.
+const inferDisplayTime = 50;  // in ms, time to show the inference output.
+const asyncTimeout     = 10;
+
+const floatRounded = 3;     // number of decimal digits to show
+
+// output canvas color during inference
+const dstCanvas_r = 0xFF;
+const dstCanvas_g = 0x00;
+const dstCanvas_b = 0x00;
+
+// inference time array
+var inferTimeList = [];
+var inferCountDown = 0;
+
+// inference result text
+var inferResultStr = "";
+const cNewLine = String.fromCharCode(13, 10);
+
+//
+// loadImage()
+//     imageUrl - URL for image to load
+//     canvasId - target canvas ID
+//     completeProc - callback when complete
+//
+function loadImage (imageUrl, canvasId, completeProc=null) {
+  var img = new Image();
+  img.src = imageUrl
+  img.onload=function() {
+    var ctx = document.getElementById(canvasId).getContext("2d");
+
+    const side = (img.height < img.width) ? img.height : img.width;
+    const sx = (img.width - side) / 2;
+    const sy = (img.height- side) / 2;
+
+    ctx.drawImage(img,
+                  sx, sy, side, side,
+                  0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    if (completeProc != null) {
+      completeProc();
+    }
+  }
+}
+
+/*
+function isMobile() {
+  var uap = new UAParser();
+  uap.setUA(navigator.userAgent);
+
+  var uapRes = uap.getResult();
+  const osName = uapRes.os.name.toLowerCase();
+
+  return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+*/
+
+function uaIsMobile() {
+  return (uaIsMobile(navigator.userAgent));
+}
+
+function uaIsMobile(uaStr) {
+var uap = new UAParser();
+uap.setUA(uaStr);
+
+var uapRes = uap.getResult();
+const osName = uapRes.os.name.toLowerCase();
+
+return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+
+function uaGetMobileDeviceModel (uaStr) {
+  // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
+  
+  if (uaStr.toLowerCase().indexOf("android") < 0)
+      return "";
+
+  // get the "(Linux; Android #.#; Model number)" in UA string.
+  // should return 2 alpha numeric strings: Android #.#, Model Number
+  patt = /\(([A-Z-.0-9 ]+[^)])+\)/gi;
+  mobileModel = patt.exec(uaStr);
+
+  // Model number is the 2nd string
+  deviceModel = mobileModel[1].trim();
+
+  return deviceModel;
+}
+
+// canvas utilities
 function setCanvasRGB(canvasId, r, g, b, a=0xFF){
   var ctx = document.getElementById(canvasId).getContext("2d");
   var h = ctx.canvas.height;
@@ -19,42 +279,9 @@ function setCanvasRGB(canvasId, r, g, b, a=0xFF){
   }
 
   ctx.putImageData(imgData, 0, 0);
-
 }
 
-var imgUrl_128 = "./images/amber_128x128.jpg";
-var canvas_128_src = "canvas_128_src";
-var canvas_128_dst = "canvas_128_dst";
-
-var imgUrl_256 = "./images/amber_256x256.jpg";
-var canvas_256_src = "canvas_256_src";
-var canvas_256_dst = "canvas_256_dst";
-
-window.onload = function() {
-  loadImage(imgUrl_128, canvas_128_src);
-  loadImage(imgUrl_256, canvas_256_src);
-}
-
-//
-// loadImage()
-//     imageUrl - URL for image to load
-//     canvasId - target canvas ID
-//     completeProc - callback when complete
-//
-function loadImage (imageUrl, canvasId, completeProc=null) {
-  var img = new Image();
-  img.src = imageUrl
-  img.onload=function() {
-    var ctx = document.getElementById(canvasId).getContext("2d");
-    ctx.drawImage(img, 0, 0);
-
-    if (completeProc != null) {
-      completeProc();
-    }
-  }
-}
-
-function contextToTensor (canvasId) {
+function canvasToTensor (canvasId) {
   var ctx = document.getElementById(canvasId).getContext("2d");
 
   const n = 1
@@ -62,17 +289,18 @@ function contextToTensor (canvasId) {
   const h = ctx.canvas.height
   const w = ctx.canvas.width
   
+  const out_data   = new Float32Array(n*c*h*w);
+
   // load src context to a tensor
   var srcImgData = ctx.getImageData(0, 0, w, h);
   var src_data = srcImgData.data;
-  
-  const out_data   = new Float32Array(n*c*h*w);
   
   var src_idx = 0;
   var out_idx_r = 0;
   var out_idx_g = out_idx_r + h*w;
   var out_idx_b = out_idx_g + h*w;
 
+  const norm = 1.0;
   for (var y=0; y<h; y++) {
     for (var x=0; x<w; x++) {
       src_r = src_data[src_idx++];
@@ -80,9 +308,9 @@ function contextToTensor (canvasId) {
       src_b = src_data[src_idx++];
       src_idx++;
 
-      out_data[out_idx_r++] = src_r;// / 255.0;// * 255.0;
-      out_data[out_idx_g++] = src_g;// / 255.0;//128.0 * 255.0;
-      out_data[out_idx_b++] = src_b;// / 255.0;//0 * 255.0;
+      out_data[out_idx_r++] = src_r / norm;
+      out_data[out_idx_g++] = src_g / norm;
+      out_data[out_idx_b++] = src_b / norm;
     }
   }
 
@@ -91,14 +319,14 @@ function contextToTensor (canvasId) {
   return out;
 }
 
-function tensorToContext (tensor, canvasId) {
+function tensorToCanvas (tensor, canvasId) {
   const h = tensor.dims[2];
   const w = tensor.dims[3];
   var t_data = tensor.data;
 
   t_idx_r = 0;
-  t_idx_g = t_idx_r + (h*w);//(h*2*w*2);
-  t_idx_b = t_idx_g + (h*w);//(h*2*w*2);
+  t_idx_g = t_idx_r + (h*w);
+  t_idx_b = t_idx_g + (h*w);
 
   var dst_ctx = document.getElementById(canvasId).getContext("2d");
   var dst_ctx_imgData = dst_ctx.getImageData(0, 0, w, h);
@@ -121,60 +349,534 @@ function tensorToContext (tensor, canvasId) {
   dst_ctx.putImageData(dst_ctx_imgData, 0, 0);
 }
 
-//
-// styleTransfer()
-//     sess - ONNX.js session (from an .onnx)
-//     srcCanvasId - source canvas ID
-//     dstCanvasId - dest canvas ID
-//
-async function styleTransfer(sess, onnxOutputId, srcCanvasId, dstCanvasId) {
+function getStyleList () {
+  const backendElem = document.getElementById("backendSelect");
+  const backend = backendElem ? backendElem.value : 'webgl';
 
-  inputTensor = contextToTensor(srcCanvasId);
-  
-  // run inference
-  const t0 = performance.now();
-  const pred = await sess.run([inputTensor]);
-  const t1 = performance.now();
-  
-  // get the result and set it to dest context
-  const output = pred.get(onnxOutputId);
-  tensorToContext (output, dstCanvasId);
-
-  return t1-t0;
+  if (backend == 'webgl') {
+    return style_list_webgl;
+  } else if (backend == 'cpu') {
+    return style_list_cpu;
+  } else if (backend == 'wasm') {
+    return style_list_wasm;
+  } else {
+    return style_list_webgl;
+  }
 }
 
-var sess = null;
+function benchmark_getStyleList () {
+  const backendElem = document.getElementById("backendSelect");
+  const backend = backendElem ? backendElem.value : 'webgl';
 
-var infer_128 = {
-  modelUrl: "./onnx_models/candy_128x128.onnx",
-  outputNodeName: "433",
-  canvas_src: canvas_128_src,
-  canvas_dst: canvas_128_dst,
-  output_html_id: "predictions_128"
-};
+  if (backend == 'webgl') {
+    return benchmark_style_list_webgl;
+  } else if (backend == 'cpu') {
+    return benchmark_style_list_cpu;
+  } else if (backend == 'wasm') {
+    return benchmark_style_list_wasm;
+  } else {
+    return benchmark_style_list_webgl;
+  }
+}
 
-var infer_256 ={
-  modelUrl: "./onnx_models/candy_256x256.onnx",
-  outputNodeName: "433",
-  canvas_src: canvas_256_src,
-  canvas_dst: canvas_256_dst,
-  output_html_id: "predictions_256"
-};
+function getContentList(){
+  return content_url_list;
+}
 
-var infer = infer_128;
+function formatFloat (f) {
+  return f.toFixed (floatRounded);
+}
 
-async function runExample() {
-  setCanvasRGB(infer.canvas_dst, 0xFF, 0, 0);
-  //setCanvasRGB(canvas_256_dst, 0, 0xFF, 0);
+function asyncSetHtml (elemNode, html) {
+  var p = new Promise( (resolve, reject) => {
+    elemNode.innerHTML = html;
+    setTimeout (resolve, 0);
+  });
 
-  // load model and create session
-  if (sess == null) {
-    sess = new onnx.InferenceSession();
-    await sess.loadModel(infer.modelUrl);
+  return p;
+}
+
+function onCopyToClipboard () {
+  inferResultsText.select();
+  document.execCommand("copy");
+}
+
+
+function htmlGenerateInferStyle(styleIdx, contentImgIdx){
+
+}
+
+// fast neural style html
+function htmlGenerateUI () {
+  htmlGenerateStyleList   (styleSelect);
+  htmlGenerateContentList (contentImgSelect);
+  htmlGenerateResult      ();
+
+  // auto run the style transfer
+  onRunFNSInfer();
+}
+
+function htmlGenerateStyleList (styleListElem) {
+  styleListElem.innerHTML = "";
+  const list = getStyleList();
+  for (i=0; i<list.length; i++) {
+    if (i==0) {
+      styleListElem.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].style_name + "</option>";
+    } else {
+      styleListElem.innerHTML += "<option value='" + i + "'>" + list[i].style_name + "</option>";
+    }
   }
 
+  htmlGenerateStyle(0);
+}
+
+function htmlGenerateStyle(styleIdx) {
+  style = getStyleList()[styleIdx];
+
+  // generate HTML
+  var html = "";
+  html += "<img src='" + style.thumb_url + "' height='" + style.height + "px' />" + "&nbsp;";
+
+  inferStyleDiv.innerHTML = html;
+}
+
+function onStyleSelectChange() {
+  // update style list and thumbnail
+  const styleIdx = document.getElementById("styleSelect").value;
+  htmlGenerateStyle(styleIdx);
+
+  // update content image so size matches the style size
+  const contentIdx = document.getElementById("contentImgSelect").value;
+  htmlGenerateContent(contentIdx);
+
+  // update stylized image so the size mathes the style size
+  htmlGenerateResult ();
+
+  // dispose inference session
+  g_onnxSess = null;
+
   // run inference
-  inferTime = await styleTransfer (sess, infer.outputNodeName, infer.canvas_src, infer.canvas_dst);
-  outputHtml = document.getElementById(infer.output_html_id);
-  outputHtml.innerHTML += "<p>inference time: " + inferTime + "ms.</p>"; 
+  onRunFNSInfer();
+}
+
+function htmlGenerateContentList(contentImgList) {
+  contentImgList.innerHTML = "";
+  const list = getContentList();
+  
+  for (i=0; i<list.length; i++) {
+    if (i==0) {
+      contentImgList.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].name + "</option>";
+    } else {
+      contentImgList.innerHTML += "<option value='" + i + "'>" + list[i].name + "</option>";
+    }
+  }
+
+  htmlGenerateContent(0);
+}
+
+function htmlGenerateContent(contentIdx, callback) {
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
+
+  const content = getContentList()[contentIdx];
+  
+  // generate content image HTML
+  var html = "";
+  //html += "<img src='"   + content.img_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<canvas id='" + srcCanvasId + "' height='" + style.height + "px' width='" + style.width + "px' ></canvas>";
+
+  contentImgDiv.innerHTML = html;
+  loadImage (content.img_url, srcCanvasId, callback);
+
+  // generate image credit
+  html = "<a href='https://" + content.credit_url + "'>" + content.credit_url + "</a>";
+  contentImgCredit.innerHTML = html;
+}
+
+function onContentImgSelectChange() {
+  const contentIdx = document.getElementById("contentImgSelect").value;
+  htmlGenerateContent(contentIdx, onRunFNSInfer);  // run style infer upon new content image is loaded
+}
+
+function htmlGenerateResult (){
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
+
+  html = "<canvas id='" + dstCanvasId + "' height='" + style.height + "' width='" + style.width + "' ></canvas>";
+  outputImgDiv.innerHTML = html;
+}
+
+async function onRunFNSInfer () {
+  const styleIdx = document.getElementById("styleSelect").value;
+  const style = getStyleList()[styleIdx];
+
+  const onnxModelUrl = style.model_url;
+  
+  //const backend = document.getElementById("backendSelect").value;
+  const backend = 'webgl';
+
+  inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=10></textarea>";
+
+  // when on desktop OS, cache inference session so it can be re-used for newly selected content image
+  if (g_onnxSess == null) {
+    g_onnxSess = new onnx.InferenceSession({backendHint: backend});
+    await g_onnxSess.loadModel(onnxModelUrl);
+  }
+
+  // disable UI
+  styleSelect.disabled = true;
+  contentImgSelect.disabled = true;
+  runInferButton.disabled = true;
+
+  //inferResultStr = "loading onnx model..." + cNewLine;
+  inferResultStr = "";
+  asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+    srcTensor = canvasToTensor(srcCanvasId);
+
+    inferResultStr += "running fast neural style..." + cNewLine;
+    asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+
+      g_onnxSess.run([srcTensor]).then( (pred)=>{
+        const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
+                                                    //    only for the case of single output node. 
+        
+        // set output canvas
+        tensorToCanvas (output, dstCanvasId);
+        
+        inferResultStr += "done" + cNewLine;
+
+        // enable UI
+        styleSelect.disabled = false;
+        contentImgSelect.disabled = false;
+        runInferButton.disabled = false;
+        
+        asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+        });
+      });
+    });
+  });
+}
+
+
+
+//-------------------------------------------------------------------------------------------------
+// benchmark html
+//-------------------------------------------------------------------------------------------------
+
+//
+// html functions
+//
+function htmlBench_GenerateStyleList(list) {
+  styleBenchSelect.innerHTML = "";
+  for (i=0; i<list.length; i++) {
+    if (i==0) {
+      styleBenchSelect.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].style_name + "</option>";
+    } else {
+      styleBenchSelect.innerHTML += "<option value='" + i + "'>" + list[i].style_name + "</option>";
+    }
+  }
+
+  htmlBench_GenerateInferStyle(0);
+}
+
+function htmlBench_GenerateInferStyle(styleIdx) {
+  style = benchmark_getStyleList()[styleIdx];
+
+  // generate HTML
+  var html = "";
+
+  html += "<img src='"   + style.thumb_url + "' height=" + style.height + " />" + "&nbsp;";
+  html += "<canvas id='" + srcCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>" + "&nbsp;";
+  html += "<canvas id='" + dstCanvasId     + "' height=" + style.height + " width=" + style.width + " ></canvas>" + "&nbsp;";
+
+  inferStyleDiv.innerHTML = html;
+
+  // load source image
+  //imgUrl = style.content_url;
+  imgUrl = g_benchmark_contentImgUrl;
+
+  loadImage (imgUrl, srcCanvasId);
+
+  // fill dest canvas to green
+  setCanvasRGB (dstCanvasId, 0x00, 0xFF, 0x00);
+}
+
+function htmlBench_onBackendChange() {
+  // re-generate style list
+  const style_list = benchmark_getStyleList();
+  htmlBench_GenerateStyleList(style_list);
+}
+
+function htmlBench_onStyleSelectChange() {
+  g_onnxSess = null;
+
+  var styleIdx = document.getElementById("styleBenchSelect").value;
+  htmlBench_GenerateInferStyle(styleIdx);
+}
+
+// do FNS benchmark asynchronously
+function htmlBench_onRunFNSBenchmark() {
+  const styleIdx = document.getElementById("styleBenchSelect").value;
+  const style = benchmark_getStyleList()[styleIdx];
+
+  const onnxModelUrl = style.model_url;
+  
+  const backend = document.getElementById("backendSelect").value;
+  g_onnxSess = new onnx.InferenceSession({backendHint: backend}); // always start a new inference session for benchmark
+
+  // reset benchmark output
+  inferTimeList = [];
+  
+  inferCountDown = totalInferCount;
+  
+  // disable UI
+  styleBenchSelect.disabled = true;
+  runInferButton.disabled = true;
+
+  // html text area
+  copyButtonDiv.innerHTML = "";
+  
+  inferResultsDiv.innerHTML = "<textarea id='inferResultsText' readonly cols=90 rows=20></textarea>";
+
+  inferResultStr = "PyTorch fast-neural-style (FNS) benchmark using ONNX.js " + onnxjs_version + cNewLine;
+
+  // date & time
+  const currentDate = new Date();
+
+  var date  = currentDate.getDate();
+  var month = currentDate.getMonth();
+  var year  = currentDate.getFullYear();
+  var hour  = currentDate.getHours();
+  var min   = currentDate.getMinutes();
+  var sec   = currentDate.getSeconds();
+  var dateStr = year + "/" + (month + 1) + "/" + date + "     " + hour + ":" + min + ":" + sec  + cNewLine + cNewLine;
+
+  inferResultStr += "Date: " + dateStr;
+
+  // UA Parser
+  var uap = new UAParser();
+  const uaStr = navigator.userAgent;
+  
+  // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
+  //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Google Pixel 3
+  //const uaStr = "Mozilla/5.0 (Linux; Android 9; CLT-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Huawei P20 Pro
+  //const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
+
+  uap.setUA(uaStr);
+  var uapRes = uap.getResult();
+  const device = uap.getDevice();
+
+  // log device model
+  if (uaIsMobile(uaStr)) {
+      var deviceModel = uaGetMobileDeviceModel(uaStr);
+
+      deviceVendor = device.vendor ? device.vendor : "";
+      inferResultStr += "device model: " + deviceVendor + " " + deviceModel + cNewLine;
+
+      if (device.type) {
+          inferResultStr += "device type: " + device.type + cNewLine;
+      }
+  } else {
+      // desktop OS has no model number.  prompt for manual input
+      inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+  }
+
+  // log browser info
+  var uap = new UAParser();
+  uap.setUA(navigator.userAgent);
+  var uapRes = uap.getResult();
+
+  inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
+  inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
+  inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + cNewLine;
+
+  inferResultStr += cNewLine;
+
+  // log cpu arch info
+  inferResultStr += "cpu arch: " + uapRes.cpu.architecture + cNewLine;
+
+  // log gpu info
+  var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
+  if (glCtx == null) {
+    inferResultStr += "cannot get 'webgl' context..." + cNewLine;
+  } else {
+    var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
+    if (glInfo != null) {
+      inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + cNewLine;
+    } else {
+      inferResultStr += "gpu: unknown" + cNewLine;
+    }
+  }
+  inferResultStr += cNewLine;
+
+  // log backend info
+  inferResultStr += "ONNX.js backend: " + backend + cNewLine;
+
+  // log inference info
+  inferResultStr += "loading '" + onnxModelUrl + "'" + cNewLine;
+  inferResultsText.innerHTML = inferResultStr;
+  
+  var loadModelT0 = performance.now();
+  g_onnxSess.loadModel(onnxModelUrl).then( ()=>{
+    var loadModelTStr = formatFloat(performance.now() - loadModelT0) + "ms";
+    inferResultStr += "load time: " + loadModelTStr + cNewLine;
+
+    inferResultStr += "warming up tensors... " + cNewLine;
+
+    asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+
+      // warmup tensor
+      warmTensor = canvasToTensor(srcCanvasId);
+  
+      const warmT0 = performance.now();
+
+      try {
+        g_onnxSess.run([warmTensor]).then( (output)=> {
+          const warmTStr = formatFloat(performance.now() - warmT0) + "ms";
+    
+          inferResultStr += "warm up time: " + warmTStr + cNewLine;
+          inferResultStr += cNewLine;
+
+          asyncSetHtml(inferResultsText, inferResultStr).then( ()=>{
+            runFNSCount();
+          });
+        });
+      } catch (e) {
+        inferResultStr += "warmup error: " + e + cNewLine;
+        inferResultsText.innerHTML += inferResultStr;
+      }
+    });
+  });
+}
+
+// FNS Inference functions and callbacks
+function FNSRunCompleteCallback() {
+  const len = inferTimeList.length;
+  var total = 0;
+  for (var i=0; i<len; i++) {
+    total += inferTimeList[i];
+  }
+
+  const m = total / len;
+  const mStr = formatFloat(m) + "ms";
+
+  inferResultStr += cNewLine;
+  inferResultStr += "average inference time: " + mStr + cNewLine;
+
+  inferResultsText.innerHTML = "```" + cNewLine + inferResultStr + "```" + cNewLine;
+  inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
+
+  // add copy button
+  copyButtonDiv.innerHTML = "<button onclick='onCopyToClipboard()'>Copy to clipboard</button>";
+
+  styleBenchSelect.disabled = false;
+  runInferButton.disabled = false;
+}
+
+// benchmark
+function runFNSCount(){
+  // reset output canvas color
+  var p = new Promise ((resolve, reject) => {
+    setCanvasRGB(dstCanvasId, dstCanvas_r, dstCanvas_g, dstCanvas_b);  // clear the output canvas
+    setTimeout (resolve, 10);
+  });
+
+  p.then( async ()=>{
+    /*
+    // run inference synchronously
+    input = canvasToTensor(srcCanvasId);
+
+    const inferT0 = performance.now();
+    
+    try {
+      pred = await g_onnxSess.run([input]);
+    } catch (e) {
+        console.error(e);
+        inferResultStr += "error: " + e + cNewLine;
+    }
+
+
+    const inferTime = performance.now() - inferT0;
+    const inferTimeStr = formatFloat(inferTime) + "ms";
+
+    const output = pred.values().next().value;
+    */
+
+    /*
+    const h = output.dims[2];
+    const w = output.dims[3];
+    var t_data = output.data;
+    inferResultStr += "output.h:" + h + cNewLine;
+    inferResultStr += "output.w:" + w + cNewLine;
+    inferResultStr += "output.data length:" + t_data.length + cNewLine;
+    */
+    /*
+    var j = 0;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    inferResultStr += "input['" + j + "']: " + input.data[j] + cNewLine; j++;
+    
+    var j = 0;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+    inferResultStr += "output['" + j + "']: " + output.data[j] + cNewLine; j++;
+
+    tensorToCanvas (output, dstCanvasId);
+
+    inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + cNewLine;
+    inferResultsText.innerHTML += inferResultStr;
+    
+    inferCountDown--;
+    if (inferCountDown == 0){
+      FNSRunCompleteCallback();
+    } else {
+      // give the output canvas some time (inferDisplayTime) to display
+      setTimeout( ()=>{
+        runFNSCount();
+      }, inferDisplayTime);
+    }
+    */
+
+    // run inference
+    inputTensor = canvasToTensor(srcCanvasId);
+
+    const inferT0 = performance.now();
+    g_onnxSess.run([inputTensor]).then((pred)=>{
+      const inferTime = performance.now() - inferT0;
+      const inferTimeStr = formatFloat(inferTime) + "ms";
+
+      inferTimeList.push(inferTime);
+
+      // get the result and callback complete function
+      //const output = pred.get(onnxOutputNodeName);
+      const output = pred.values().next().value;  // consume output this way so no need to specify output node name.
+                                                  //    only for the case of single output node.  
+      
+      // set output canvas
+      tensorToCanvas (output, dstCanvasId);
+
+      inferResultStr += "inference time #" + (inferTimeList.length) + ": " + inferTimeStr + cNewLine;
+      asyncSetHtml(inferResultsText, inferResultStr).then( ()=> {
+        inferResultsText.scrollTop = inferResultsText.scrollHeight; // scroll to bottom
+
+        inferCountDown--;
+        if (inferCountDown == 0){
+          FNSRunCompleteCallback();
+        } else {
+          // give the output canvas some time (inferDisplayTime) to display
+          setTimeout( ()=>{
+            runFNSCount();
+          }, inferDisplayTime);
+        }
+      });
+    });
+  });
 }

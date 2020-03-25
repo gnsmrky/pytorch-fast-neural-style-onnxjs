@@ -1,0 +1,395 @@
+<html>
+    
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONNX.js op test</title>
+
+<script>
+        const cOnnxjsVersion="v0.1.5"; // set this to the same version string as in npm url for onnx.min.js
+</script>
+<script src="https://cdn.jsdelivr.net/npm/onnxjs@0.1.5/dist/onnx.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
+
+<body onload="htmlGenerateUI()">
+<a href="https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/tree/gh-pages" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+<font face="verdana">
+<h1>ONNX.js op test</h1>
+
+<table>
+    <tr>
+        <td align='right'>Backend:<br/>&nbsp;</td>
+        <td>
+            <select id="backendSelectElem" onchange="htmlOnBackendSelectChange()">
+                <option value='webgl'  selected='selected'>WebGL</option>
+                <option value='cpu'>CPU</option>
+                <option value='wasm'>Web Assembly</option>
+            </select>
+            <br/>&nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td align='right'>ONNX Op model:</td>
+        <td>
+            <select id="opModelSelectElem" onchange="htmlOnOpModelSelectChange()"></select>
+        </td>
+    </tr>
+    <tr>
+        <td align='right' valign='top'>ONNX Graph:</td>
+        <td><img id='onnxGraphElem' width='100px' src=''/></td>
+    </tr>
+</table>
+
+<br/>
+
+<input type="button" id="testButtonElem" value="Run Op Test" onclick="htmlOnRunOpTest()"/>
+
+<p>
+<div id='logOutputDiv'></div>
+</p>
+
+<p>
+<table>
+    <tr>
+        <td><div id="copyButtonDiv"></div></td>
+        <td>&nbsp;&nbsp;</td>
+        <td><div id="postLinkDiv"></div></td>
+    </tr>
+</table>
+</p>
+
+<p>
+<div id="logAllOutputDiv"></div>
+</p>
+
+</font>
+
+<script>
+const cBackendSelectId = "backendSelectElem";
+const cOpModelSelectId = "opModelSelectElem";
+
+const cModelList = [
+    { name: "Conv2d"                        , model_url: "./onnx_test/test_conv2d_128x128.onnx" },
+    { name: "Pad 'Reflection' mode"         , model_url: "./onnx_test/test_pad_reflect_128x128.onnx" },
+    { name: "Pad 'Reflection' mode + Conv2D", model_url: "./onnx_test/test_pad_reflect_conv2d_128x128.onnx" },
+    { name: "Pad 'Zero' mode"               , model_url: "./onnx_test/test_pad_zero_128x128.onnx" },
+];
+
+
+const cNewLine = String.fromCharCode(13, 10);
+
+function uaIsMobile() {
+    return (uaIsMobile(navigator.userAgent));
+}
+
+function uaIsMobile(uaStr) {
+  var uap = new UAParser();
+  uap.setUA(uaStr);
+
+  var uapRes = uap.getResult();
+  const osName = uapRes.os.name.toLowerCase();
+
+  return (osName.indexOf("ios") >=0) || (osName.indexOf("android") >= 0);
+}
+
+function uaGetMobileDeviceModel (uaStr) {
+    // a bug in UAParser, the number after model name is missing.  i.e. 'Pixel 3' only returns 'Pixel'
+    
+    if (uaStr.toLowerCase().indexOf("android") < 0)
+        return "";
+
+    // get the "(Linux; Android #.#; Model number)" in UA string.
+    // should return 2 alpha numeric strings: Android #.#, Model Number
+    patt = /\(([A-Z-.0-9 ]+[^)])+\)/gi;
+    mobileModel = patt.exec(uaStr);
+
+    // Model number is the 2nd string
+    deviceModel = mobileModel[1].trim();
+
+    return deviceModel;
+}
+
+/*
+function uaGetDeviceModel (uaStr) {
+    // only mobile device has model number in UA string.
+    if (!uaIsMobile()) {
+        return "";
+    }
+
+    // US Parser
+    var uap = new UAParser();
+    const uaStr = navigator.userAgent;
+    
+    uap.setUA(uaStr);
+
+    // detect device model
+    const device = uap.getDevice();
+    var deviceModel = uaGetMobileDeviceModel(uaStr);
+
+    return deviceModel;
+}
+*/
+
+function asyncSetHtml (elemNode, html) {
+  var p = new Promise( (resolve, reject) => {
+    elemNode.innerHTML = html;
+    setTimeout (resolve, 0);
+  });
+
+  return p;
+}
+
+function htmlClearUI (){
+    logOutputDiv.innerHTML  = "";
+    copyButtonDiv.innerHTML = "";
+    postLinkDiv.innerHTML = "";
+}
+
+function htmlGenerateUI () {
+    htmlGenerateModelList(opModelSelectElem);
+}
+
+function htmlGenerateModelList (listElem) {
+    listElem.innerHTML = "";
+    const list = cModelList;
+    for (i=0; i<list.length; i++) {
+        if (i==0) {
+            listElem.innerHTML += "<option value='" + i + "' selected='selected'>" + list[i].name + "</option>";
+        } else {
+            listElem.innerHTML += "<option value='" + i + "'>" + list[i].name + "</option>";
+        }
+    }
+
+    onnxGraphElem.src = list[0].model_url + ".png";
+}
+
+function htmlOnBackendSelectChange() {
+    htmlClearUI();
+}
+
+function htmlOnOpModelSelectChange() {
+    htmlClearUI();
+
+    const modelIdx = opModelSelectElem.value;
+    
+    const list = cModelList;
+    onnxGraphElem.src = list[modelIdx].model_url + ".png";
+}
+
+function htmlOnCopyToClipboard (textAreaElem) {
+    //outputElem = document.getElementById(textAreaId);
+    textAreaElem.select();
+    document.execCommand("copy");
+
+    // add post link only after "copy" command is done
+    isMobile = uaIsMobile();
+    issueIdx = isMobile ? 2 : 1;
+    issueTypeStr = isMobile ? "mobile" : "desktop";
+    postLinkDiv.innerHTML = "<a href='https://github.com/gnsmrky/pytorch-fast-neural-style-onnxjs/issues/" + issueIdx + "'>Post/paste the result here for " + issueTypeStr + "</a>";
+}
+
+function htmlOnRunOpTest() {
+    inferResultStr  = "Description: [describe the result here]" + cNewLine;
+    inferResultStr += cNewLine + cNewLine + cNewLine;
+
+    // log browser info
+    var uap = new UAParser();
+    const uaStr = navigator.userAgent;
+    
+    // test UA string from Pixel 3.  UAParser() only returns 'Pixel'.
+    //const uaStr = "Mozilla/5.0 (Linux; Android 9; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Google Pixel 3
+    //const uaStr = "Mozilla/5.0 (Linux; Android 9; CLT-L29) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Mobile Safari/537.36"; // Huawei P20 Pro
+    //const uaStr = "Mozilla/5.0 (Linux; Android 7.0; A3-A50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.90 Safari/537.36"; // Acer Iconia A3-A50
+
+    uap.setUA(uaStr);
+    var uapRes = uap.getResult();
+    
+    // log device model
+    const device = uap.getDevice();
+
+    if (uaIsMobile(uaStr)) {
+        var deviceModel = uaGetMobileDeviceModel(uaStr);
+
+        deviceVendor = device.vendor ? device.vendor : "";
+        inferResultStr += "device model: " + deviceVendor + " " + deviceModel + cNewLine;
+
+        if (device.type) {
+            inferResultStr += "device type: " + device.type + cNewLine;
+        }
+
+        inferResultStr += cNewLine;
+        inferResultStr += cNewLine;
+
+    } else {
+        // desktop OS has no model number.  prompt for manual input
+        inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+
+        inferResultStr += cNewLine;
+        inferResultStr += cNewLine;
+    }
+    
+    /*
+    if (deviceModel == "") {
+        // try one more time to detect mobile device model
+        deviceModel = uaGetMobileDeviceModel(uaStr);
+        if (deviceModel != "") {
+            inferResultStr += "device model: " + deviceModel + cNewLine;
+        } else {
+            // user input for models
+            inferResultStr += "System Model: [manual input system model here]" + cNewLine;
+        }
+        inferResultStr += "Device Model: [manual input system model here]" + cNewLine;
+
+        inferResultStr += cNewLine;
+        inferResultStr += cNewLine;
+    }
+    */
+
+    // log output
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    
+    inferResultStr += "ONNX.js Op Test - " + cModelList[opModelIdx].name + cNewLine;
+    inferResultStr += "----------------------------------------------------------------------" + cNewLine;
+    inferResultStr += "ONNX.js " + cOnnxjsVersion + cNewLine + cNewLine;
+
+    // log backend info
+    backend = backendSelectElem.value;
+    inferResultStr += "backend: " + backend + cNewLine;
+    
+    // log onnx model file
+    const modelUrl = cModelList[opModelIdx].model_url;
+    inferResultStr += "model file: " + modelUrl + cNewLine;
+    
+    // onnx graph file
+    inferResultStr += "<img src='" + onnxGraphElem.src + "' height='200'>" + cNewLine;
+
+    inferResultStr += cNewLine;
+    inferResultStr += "os: "      + uapRes.os.name      + " " + uapRes.os.version      + cNewLine;
+    inferResultStr += "browser: " + uapRes.browser.name + " " + uapRes.browser.version + cNewLine;
+    inferResultStr += "engine: "  + uapRes.engine.name  + " " + uapRes.engine.version  + cNewLine;
+
+    inferResultStr += cNewLine;
+
+    // log cpu arch info
+    inferResultStr += "cpu arch: " + uapRes.cpu.architecture + cNewLine;
+
+    // log gpu info
+    var glCtx = glcanvas.getContext("webgl") || glcanvas.getContext("experimental-webgl");
+    if (glCtx == null) {
+        inferResultStr += "cannot get 'webgl' context..." + cNewLine;
+    } else {
+        var glInfo = glCtx.getExtension("WEBGL_debug_renderer_info");
+        if (glInfo != null) {
+        inferResultStr += "gpu: " + glCtx.getParameter(glInfo.UNMASKED_RENDERER_WEBGL) + cNewLine;
+        } else {
+        inferResultStr += "gpu: unknown" + cNewLine;
+        }
+    }
+    inferResultStr += cNewLine;
+
+    // create partial output text area
+    const logOutputElemId = "resultLogElem";
+    logOutputDiv.innerHTML = "<textarea id='" + logOutputElemId + "' readonly cols=90 rows=30></textarea>";
+
+    // add copy button
+    copyButtonDiv.innerHTML  = "<button onclick='htmlOnCopyToClipboard(" + logOutputElemId + ")'>Copy to clipboard</button>";
+    //copyButtonDiv.innerHTML += "&nbsp;&nbsp;&nbsp;";
+
+    // load & run inference
+    inferResultStr += "```" + cNewLine;
+
+    outputElem = document.getElementById(logOutputElemId);
+    asyncSetHtml (outputElem, inferResultStr).then( ()=> {
+        runOpTest((output)=> {
+            outputElem.innerHTML += "output:" + cNewLine;
+            outputElem.innerHTML += "----------------------------------------------------------------------" + cNewLine;
+
+            const outputT = output.values().next().value;
+            outputElem.innerHTML += "output tensor dimension:" + outputT.dims + cNewLine;
+            outputElem.innerHTML += "output tensor size:" + outputT.size + cNewLine + cNewLine;
+            
+            outputElem.innerHTML += makeOutputHtml(outputT, true);
+
+            outputElem.innerHTML += "```";
+
+        }, (errorHtml)=>{
+            outputElem.innerHTML += errorHtml;
+        });
+    });
+}
+
+function makeOutputHtml (outputT, isPartialOutput) {
+    const cNumValues = 16
+    outputHtml = "";
+
+    if (isPartialOutput) { // partial output
+        outputHtml += "row 0:" + cNewLine;
+        for (var i=0; i<cNumValues; i++) {
+            outputHtml += "output.data[0, " + i + "]: " + outputT.data[i] + cNewLine;
+        }
+        outputHtml += "... ... ..." + cNewLine + cNewLine;
+
+        // display few floats in the middle of the image
+        const rowIdx = outputT.dims[2] / 2;
+        outputHtml += "row " + rowIdx + ":" + cNewLine;
+        const cSkip = rowIdx * outputT.dims[3];
+        for (var j=0; j<cNumValues; j++) {
+            const i = j + cSkip;
+            outputHtml += "output.data[" + rowIdx + "," + j + "]: " + outputT.data[i] + cNewLine;
+        }
+        outputHtml += "... ... ..." + cNewLine;
+        outputHtml += cNewLine;
+    } else { // full output, output first 16 values of each row
+        alloutputHtml += "model output tensor size:" + outputT.size + cNewLine + cNewLine;
+        const rowVals = outputT.size / outputT.dims[2];
+        
+        for (var y=0; y<outputT.size; y+=rowVals) {
+            for (var x=0; x<cNumValues; x++) {
+                alloutputHtml += "output.data[" + y + " + " + x + "]: " + outputT.data[y + x] + cNewLine;
+            }
+        }
+    }
+
+    return outputHtml;
+}
+
+function runOpTest (completeCallback, errCallback) {
+    
+    const backend = document.getElementById(cBackendSelectId).value;
+    const opModelIdx = document.getElementById(cOpModelSelectId).value;
+    
+    const sess = new onnx.InferenceSession({backendHint: backend});
+
+    const modelUrl = cModelList[opModelIdx].model_url;
+
+    sess.loadModel(modelUrl).then(()=>{
+        const n = 3;
+        const h = 128;
+        const w = 128;
+
+        // creates input.  normalize each element to 0 ~ 1.0.
+        const x = new Float32Array(1*n*h*w);
+        for (i=0; i<1*n*h*w; i++) {
+            x[i] = (i%256) / 255.0;
+        }
+
+        const inputT = new onnx.Tensor(x, 'float32', [1,n,h,w]);
+        
+        sess.run([inputT]).then(output=>{
+            completeCallback(output);
+        }).catch ((e) => {
+            errHtml = "!!!inference error!!! " + cNewLine + e + cNewLine;
+            errCallback(errHtml);
+        });
+    }).catch((e)=> {
+        errHtml = "!!!load error!!! " + cNewLine + e + cNewLine;
+        errCallback(errHtml);
+    });
+
+}
+</script>
+
+  <!-- zero width & height canvas to get gpu info -->
+  <canvas id="glcanvas" width="0" height="0"></canvas>
+</body>
+</html>
+
